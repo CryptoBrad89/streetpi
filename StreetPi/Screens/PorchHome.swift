@@ -111,24 +111,32 @@ struct PorchHome: View {
 private struct PorchCard<Content: View>: View {
     var theme: StreetTheme
     var scheme: ColorScheme
+    @Environment(\.streetPiStill) private var still
     @ViewBuilder var content: Content
 
     var body: some View {
-        if #available(iOS 26, *), scheme == .dark {
-            content
-                .padding(Rhythm.block)
+        content
+            .padding(Rhythm.block)
+            .background { plate }
+    }
+
+    /// Glass does not rasterize in the snapshot harness, and wrapping the type in
+    /// `glassEffect` recorded a blank card. The words sit on a solid plate. Glass
+    /// is a live iOS 26 layer behind them.
+    @ViewBuilder
+    private var plate: some View {
+        let shape = RoundedRectangle(cornerRadius: 28, style: .continuous)
+        if #available(iOS 26, *), scheme == .dark, !still {
+            shape
+                .fill(theme.surface)
                 .glassEffect(.regular.tint(theme.accent.opacity(0.22)), in: .rect(cornerRadius: 28))
-        } else if scheme == .dark {
-            content
-                .padding(Rhythm.block)
-                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        } else if scheme == .dark, !still {
+            shape.fill(.ultraThinMaterial)
         } else {
-            content
-                .padding(Rhythm.block)
-                .background(theme.surface, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+            shape
+                .fill(theme.surface)
                 .overlay {
-                    RoundedRectangle(cornerRadius: 28, style: .continuous)
-                        .stroke(theme.hairline, lineWidth: 1)
+                    shape.stroke(theme.hairline, lineWidth: 1)
                 }
         }
     }
