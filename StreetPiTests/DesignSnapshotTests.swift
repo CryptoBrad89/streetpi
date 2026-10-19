@@ -282,8 +282,7 @@ final class DesignSnapshotTests: XCTestCase {
         named: String,
         testName: String = #function
     ) {
-        // Recording stays on only while the new frames are collected. The follow-up commit turns it off.
-        withSnapshotTesting(record: .all) {
+        withSnapshotTesting(record: .never) {
             assertSnapshot(
                 of: view,
                 as: .image(layout: .device(config: layout), traits: traits(scheme: scheme, size: size)),
