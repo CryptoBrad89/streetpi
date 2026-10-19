@@ -1,0 +1,46 @@
+excluded:
+  - .build
+  - StreetPiCore/.build
+  - build
+  - DerivedData
+
+disabled_rules:
+  - todo
+  - trailing_comma
+
+opt_in_rules:
+  - empty_count
+  - fatal_error_message
+  - force_unwrapping
+
+line_length:
+  warning: 120
+  error: 160
+
+function_body_length:
+  warning: 80
+  error: 160
+
+type_body_length:
+  warning: 350
+  error: 500
+
+file_length:
+  warning: 500
+  error: 800
+
+cyclomatic_complexity:
+  warning: 12
+  error: 25
+
+identifier_name:
+  min_length: 2
+  excluded:
+    - id
+    - ok
+    - to
+
+force_unwrapping: error
+force_cast: error
+
+reporter: xcode

@@ -1,0 +1,43 @@
+{
+  "capturedAt": "2026-10-19T14:48:00Z",
+  "dns": {
+    "blockingEnabled": true
+  },
+  "link": {
+    "cachedAt": "2026-10-19T14:48:00Z",
+    "kind": "away"
+  },
+  "machine": {
+    "cpuUsedFraction": 0.18,
+    "diskUsedFraction": 0.22,
+    "memoryUsedFraction": 0.41,
+    "temperatureCelsius": 47.2,
+    "uptimeSeconds": 1036800
+  },
+  "services": [
+    {
+      "id": "pi-hole",
+      "kind": "dnsFilter",
+      "name": "Pi-hole",
+      "state": "notResponding"
+    },
+    {
+      "id": "unbound",
+      "kind": "resolver",
+      "name": "Unbound",
+      "state": "responding"
+    },
+    {
+      "id": "home-assistant",
+      "kind": "homeAutomation",
+      "name": "Home Assistant",
+      "state": "responding"
+    },
+    {
+      "id": "media",
+      "kind": "media",
+      "name": "Media",
+      "state": "responding"
+    }
+  ]
+}

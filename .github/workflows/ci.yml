@@ -1,0 +1,96 @@
+name: CI
+
+# Standard GitHub-hosted runners only. Do not switch this to macos-26-large,
+# macos-26-xlarge, or any larger runner. Those can bill outside the free plan.
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: streetpi-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  core:
+    name: StreetPiCore (Linux)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Swift 6.2.4
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+            binutils git gnupg2 libc6-dev libcurl4-openssl-dev libedit2 \
+            libgcc-13-dev libncurses-dev libpython3-dev libsqlite3-0 \
+            libstdc++-13-dev libxml2-dev libz3-dev pkg-config tzdata \
+            zip unzip zlib1g-dev curl ca-certificates
+          curl -fL --retry 3 -o /tmp/swift.tar.gz \
+            "https://download.swift.org/swift-6.2.4-release/ubuntu2404/swift-6.2.4-RELEASE/swift-6.2.4-RELEASE-ubuntu24.04.tar.gz"
+          sudo mkdir -p /opt/swift
+          sudo tar -xzf /tmp/swift.tar.gz -C /opt/swift --strip-components=1
+          echo /opt/swift/usr/bin >> "$GITHUB_PATH"
+
+      - name: SwiftLint
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 -o /tmp/swiftlint.zip \
+            "https://github.com/realm/SwiftLint/releases/download/0.65.1/swiftlint_linux_amd64.zip"
+          unzip -qo /tmp/swiftlint.zip -d /tmp/swiftlint-bin
+          chmod +x /tmp/swiftlint-bin/swiftlint
+          /tmp/swiftlint-bin/swiftlint lint --config .swiftlint.yml \
+            StreetPi StreetPiCore/Sources StreetPiCore/Tests StreetPiTests StreetPiCore/Package.swift
+
+      - name: Test StreetPiCore
+        run: swift test --package-path StreetPiCore
+
+  ios:
+    name: iOS snapshots and unsigned IPA
+    runs-on: macos-26
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Xcode
+        run: |
+          xcodebuild -version
+          xcode-select -p
+
+      - name: Snapshot tests
+        run: |
+          set -euo pipefail
+          DEST="$(bash scripts/pick-simulator.sh)"
+          echo "Destination: ${DEST}"
+          xcodebuild test \
+            -project StreetPi.xcodeproj \
+            -scheme StreetPi \
+            -destination "${DEST}" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY=""
+
+      - name: Upload design snapshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: design-snapshots
+          path: StreetPiTests/__Snapshots__
+          if-no-files-found: warn
+
+      - name: Unsigned IPA
+        if: success()
+        run: bash scripts/unsigned-ipa.sh
+
+      - name: Upload unsigned IPA
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: streetpi-unsigned-ipa
+          path: StreetPi-unsigned.ipa
+          if-no-files-found: error
