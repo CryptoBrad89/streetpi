@@ -15,40 +15,56 @@ struct ActionConfirm: View {
         ZStack {
             Color.black.opacity(0.55)
                 .ignoresSafeArea()
-            ScrollView {
-                VStack(alignment: .leading, spacing: Rhythm.block) {
-                    Text("Before this changes")
-                        .font(.system(.title2, design: .rounded))
-                        .foregroundStyle(theme.ink)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .accessibilityAddTraits(.isHeader)
-                    Text(confirmation.explanation ?? "")
-                        .font(.body)
-                        .foregroundStyle(theme.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                    VStack(spacing: Rhythm.line) {
-                        confirmButton
-                        Button("Cancel", action: onCancel)
-                            .font(.body.weight(.semibold))
-                            .foregroundStyle(theme.ink)
-                            .frame(maxWidth: .infinity)
-                            .padding(Rhythm.line)
-                    }
-                }
-                .padding(Rhythm.block)
-                .frame(maxWidth: 480)
-                .background(theme.surface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 24, style: .continuous)
-                        .stroke(theme.hairline, lineWidth: 1)
-                }
-                .padding(Rhythm.page)
-                .frame(maxWidth: .infinity)
+            ViewThatFits(in: .vertical) {
+                card(scrolls: false)
+                card(scrolls: true)
             }
-            .scrollIndicators(.hidden)
+            .padding(Rhythm.page)
         }
         .accessibilityAddTraits(.isModal)
         .accessibilityElement(children: .contain)
+    }
+
+    private func card(scrolls: Bool) -> some View {
+        VStack(alignment: .leading, spacing: Rhythm.block) {
+            if scrolls {
+                ScrollView {
+                    words
+                }
+                .scrollIndicators(.hidden)
+            } else {
+                words
+            }
+            VStack(spacing: Rhythm.line) {
+                confirmButton
+                Button("Cancel", action: onCancel)
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(theme.ink)
+                    .frame(maxWidth: .infinity)
+                    .padding(Rhythm.line)
+            }
+        }
+        .padding(Rhythm.block)
+        .frame(maxWidth: 480)
+        .background(theme.surface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(theme.hairline, lineWidth: 1)
+        }
+    }
+
+    private var words: some View {
+        VStack(alignment: .leading, spacing: Rhythm.line) {
+            Text("Before this changes")
+                .font(.system(.title2, design: .rounded))
+                .foregroundStyle(theme.ink)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityAddTraits(.isHeader)
+            Text(confirmation.explanation ?? "")
+                .font(.body)
+                .foregroundStyle(theme.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 
     private var confirmButton: some View {
