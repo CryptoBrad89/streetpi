@@ -5,7 +5,7 @@
 Every thread that changes the app inherits this rule. Do not skip a tool, swap one out, or quietly replace it. If you believe a tool below is a bad idea for this app, stop and report why before writing code.
 
 1. **Paul Hudson, SwiftUI Pro.** https://github.com/twostraws/SwiftUI-Agent-Skill — read `swiftui-pro/SKILL.md` and the reference that matches the change (accessibility, views, navigation, data, design) before writing or reviewing SwiftUI.
-2. **Thomas Ricouard, Liquid Glass and UI patterns.** https://github.com/Dimillian/Skills — `swiftui-liquid-glass` and `swiftui-ui-patterns`. Liquid Glass on iOS 26 and later. On older iOS, use a tasteful material fallback. Glass is for chrome and the Porch card, not for body text.
+2. **Thomas Ricouard, Liquid Glass and UI patterns.** https://github.com/Dimillian/Skills — `swiftui-liquid-glass` and `swiftui-ui-patterns`. Liquid Glass on iOS 26 and later. On older iOS, use a tasteful material fallback. Glass is for chrome and the status card, not for body text.
 3. **Point-Free swift-snapshot-testing.** https://github.com/pointfreeco/swift-snapshot-testing — visual review loop. Every screen in dark and light, default and largest Dynamic Type, small iPhone, large iPhone, and iPad. Review the images and fix what looks off before calling the work done.
 4. **SF Symbols 7 and native SwiftUI animation and symbol effects.** Pow (https://github.com/EmergeTools/Pow) is optional. Use it only for a delight moment native effects cannot do. Phase 1 uses native symbol effects and does not vendor Pow.
 5. **Design taste.** Pick a deliberate direction. Ban generic defaults: no stock “AI app” gradients, no default List inside a NavigationStack where a designed screen belongs. Run the pre-ship checklist below.
@@ -34,7 +34,7 @@ For every screen: dark, light, Dynamic Type `.large`, Dynamic Type `.accessibili
 ### Pre-ship checklist
 
 - Dark was designed first. Light still looks intentional.
-- The three directions are visibly different.
+- The look is the chosen hybrid: a warm rounded status card, labelled meter rows, and a plain service list. Do not bring back a direction picker.
 - Copy is original plain English. No text, icons, or screenshots from Open Pi or Pi-hole Remote.
 - Reduce Motion, VoiceOver labels, and Dynamic Type were considered.
 - No analytics, ads, crash reporting, or tracking SDK.

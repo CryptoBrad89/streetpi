@@ -2,15 +2,11 @@
 
 StreetPi is a native iPhone and iPad app for the Street house. One app, one experience. It says what the house is doing in plain English.
 
-Phase 1 is the foundation and three design directions. The screen is drawn from fake fixtures. It does not talk to the Pi, the router, or any other host.
+The screen is drawn from fake fixtures. It does not talk to the Pi, the router, or any other host.
 
-## Design directions
+## Look
 
-- **Lampblack** — editorial type on a warm black page. Light mode is paper.
-- **Harbor** — a cool instrument grid with a teal rail. Light mode is fog.
-- **Porch** — one household card. Dark mode uses Liquid Glass on iOS 26; light mode is a cream card.
-
-Settings includes Appearance (System, Dark, Light) and the direction switch so the three can be compared. Dark is the primary design.
+One direction. A warm rounded card says how the house is doing. Under it, labelled meters (Processor, Temperature, Memory, Disk) and a plain list of services. Dark is the primary design. Light mode is cream. Settings has Appearance: System, Dark, Light.
 
 ## Layout
 
@@ -26,4 +22,4 @@ Secrets go in the iOS Keychain (`KeychainSecretStore`). Tests use `MemorySecretS
 
 GitHub Actions runs the core tests on Ubuntu and, on a standard `macos-26` runner, the snapshot matrix plus an unsigned `StreetPi-unsigned.ipa`. Do not move that job to a large or extra-large runner.
 
-Snapshots cover each direction, Settings, and the intro, in dark and light, default and largest Dynamic Type, on a small iPhone, a large iPhone, and an iPad.
+Snapshots cover Home, Settings, and the intro, in dark and light, default and largest Dynamic Type, on a small iPhone, a large iPhone, and an iPad.

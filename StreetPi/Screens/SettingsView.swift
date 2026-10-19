@@ -3,22 +3,19 @@ import SwiftUI
 struct SettingsView: View {
     var theme: StreetTheme
     var appearance: AppearancePreference
-    var direction: DesignDirection
     var onAppearance: (AppearancePreference) -> Void
-    var onDirection: (DesignDirection) -> Void
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Rhythm.block) {
                 Text("Settings")
-                    .font(.system(.largeTitle, design: titleDesign))
+                    .font(.system(.largeTitle, design: .rounded))
                     .foregroundStyle(theme.ink)
                     .lineLimit(2)
                     .minimumScaleFactor(0.55)
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityAddTraits(.isHeader)
                 appearanceBlock
-                directionBlock
                 Text("StreetPi is the same app for everyone in the house. Nothing here is tied to a person.")
                     .font(.footnote)
                     .foregroundStyle(theme.tertiary)
@@ -30,17 +27,6 @@ struct SettingsView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .scrollIndicators(.hidden)
-    }
-
-    private var titleDesign: Font.Design {
-        switch direction {
-        case .harbor:
-            .monospaced
-        case .porch:
-            .rounded
-        case .lampblack:
-            .serif
-        }
     }
 
     private var appearanceBlock: some View {
@@ -67,48 +53,6 @@ struct SettingsView: View {
                 theme: theme
             ) {
                 onAppearance(choice)
-            }
-        }
-    }
-
-    private var directionBlock: some View {
-        VStack(alignment: .leading, spacing: Rhythm.line) {
-            Text("Direction")
-                .font(.headline)
-                .foregroundStyle(theme.ink)
-            Text("Three ways the home screen can look. The facts stay the same.")
-                .font(.subheadline)
-                .foregroundStyle(theme.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-            ForEach(DesignDirection.allCases) { choice in
-                Button {
-                    onDirection(choice)
-                } label: {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(choice.title)
-                            .font(.title3)
-                            .foregroundStyle(theme.ink)
-                            .lineLimit(2)
-                            .minimumScaleFactor(0.7)
-                            .fixedSize(horizontal: false, vertical: true)
-                        Text(choice.blurb)
-                            .font(.subheadline)
-                            .foregroundStyle(theme.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(Rhythm.line)
-                    .background(
-                        choice == direction ? theme.surface : Color.clear,
-                        in: RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    )
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(choice == direction ? theme.accent : theme.hairline, lineWidth: 1)
-                    }
-                }
-                .buttonStyle(.plain)
-                .accessibilityAddTraits(choice == direction ? .isSelected : [])
             }
         }
     }

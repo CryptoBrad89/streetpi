@@ -10,28 +10,19 @@ final class DesignSnapshotTests: XCTestCase {
     private let now = Date.streetFixtureNow
     private let house = HouseholdSnapshot.healthyFixture
 
-    func testLampblack() {
-        assertHome(.lampblack)
-    }
-
-    func testHarbor() {
-        assertHome(.harbor)
-    }
-
-    func testPorch() {
-        assertHome(.porch)
+    func testHome() {
+        assertMatrix(section: .home, snapshot: house, testName: "home")
     }
 
     func testSettings() {
-        assertMatrix(direction: .lampblack, section: .settings)
+        assertMatrix(section: .settings, snapshot: house, testName: "settings")
     }
 
     func testIntro() {
         for scheme in [ColorScheme.dark, ColorScheme.light] {
             for size in SnapshotScale.allCases {
                 for device in SnapshotDevice.allCases {
-                    let theme = DesignDirection.lampblack.theme(scheme)
-                    let view = IntroView(theme: theme, animatesIn: false) {}
+                    let view = IntroView(theme: .house(scheme), animatesIn: false) {}
                         .environment(\.colorScheme, scheme)
                         .environment(\.dynamicTypeSize, size.dynamicType)
                         .environment(\.streetPiStill, true)
@@ -48,24 +39,17 @@ final class DesignSnapshotTests: XCTestCase {
         }
     }
 
-    private func assertHome(_ direction: DesignDirection) {
-        assertMatrix(direction: direction, section: .home)
-    }
-
-    private func assertMatrix(direction: DesignDirection, section: AppSection) {
-        let sectionName = section == .home ? "home" : "settings"
+    private func assertMatrix(section: AppSection, snapshot: HouseholdSnapshot, testName: String) {
         for scheme in [ColorScheme.dark, ColorScheme.light] {
             for size in SnapshotScale.allCases {
                 for device in SnapshotDevice.allCases {
                     let view = AppShell(
                         section: section,
-                        direction: direction,
                         appearance: scheme == .dark ? .dark : .light,
-                        snapshot: house,
+                        snapshot: snapshot,
                         now: now,
                         onSection: { _ in },
-                        onAppearance: { _ in },
-                        onDirection: { _ in }
+                        onAppearance: { _ in }
                     )
                     .environment(\.colorScheme, scheme)
                     .environment(\.dynamicTypeSize, size.dynamicType)
@@ -77,7 +61,7 @@ final class DesignSnapshotTests: XCTestCase {
                             traits: traits(scheme: scheme, size: size)
                         ),
                         named: "\(name(scheme))-\(size.rawValue)-\(device.rawValue)",
-                        testName: "\(direction.rawValue)-\(sectionName)"
+                        testName: testName
                     )
                 }
             }

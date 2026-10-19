@@ -38,7 +38,7 @@ struct ToneMark: View {
     }
 }
 
-/// Glass is reserved for chrome and the Porch card. Reading type stays on a solid ground.
+/// Glass is reserved for chrome and the status card. Reading type stays on a solid ground.
 struct SkipControl: View {
     var title: String
     var action: () -> Void

@@ -3,19 +3,17 @@ import StreetPiCore
 
 struct AppShell: View {
     var section: AppSection
-    var direction: DesignDirection
     var appearance: AppearancePreference
     var snapshot: HouseholdSnapshot
     var now: Date
     var onSection: (AppSection) -> Void
     var onAppearance: (AppearancePreference) -> Void
-    var onDirection: (DesignDirection) -> Void
 
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     private var theme: StreetTheme {
-        direction.theme(colorScheme)
+        .house(colorScheme)
     }
 
     private var status: PlainEnglishStatus {
@@ -60,7 +58,7 @@ struct AppShell: View {
     private var sidebar: some View {
         VStack(alignment: .leading, spacing: Rhythm.line) {
             Text("StreetPi")
-                .font(wordmark)
+                .font(.system(.title3, design: .rounded))
                 .foregroundStyle(theme.ink)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
@@ -69,9 +67,6 @@ struct AppShell: View {
             sidebarButton("Home", section: .home)
             sidebarButton("Settings", section: .settings)
             Spacer(minLength: 0)
-            Text(direction.title)
-                .font(.caption)
-                .foregroundStyle(theme.tertiary)
         }
         .padding(Rhythm.page)
         .frame(maxHeight: .infinity, alignment: .topLeading)
@@ -99,7 +94,7 @@ struct AppShell: View {
     }
 
     private var phoneChrome: some View {
-        let title = Text(direction.title)
+        let title = Text("StreetPi")
             .font(.caption)
             .foregroundStyle(theme.tertiary)
             .textCase(.uppercase)
@@ -141,42 +136,13 @@ struct AppShell: View {
         }
     }
 
-    private var wordmark: Font {
-        switch direction {
-        case .lampblack:
-            .system(.title3, design: .serif)
-        case .harbor:
-            .system(.title3, design: .monospaced)
-        case .porch:
-            .system(.title3, design: .rounded)
-        }
-    }
-
     @ViewBuilder
     private func detail(wide: Bool) -> some View {
         switch section {
         case .home:
-            home(wide: wide)
+            HomeView(theme: theme, scheme: colorScheme, snapshot: snapshot, status: status, wide: wide)
         case .settings:
-            SettingsView(
-                theme: theme,
-                appearance: appearance,
-                direction: direction,
-                onAppearance: onAppearance,
-                onDirection: onDirection
-            )
-        }
-    }
-
-    @ViewBuilder
-    private func home(wide: Bool) -> some View {
-        switch direction {
-        case .lampblack:
-            LampblackHome(theme: theme, snapshot: snapshot, status: status)
-        case .harbor:
-            HarborHome(theme: theme, snapshot: snapshot, status: status, wide: wide)
-        case .porch:
-            PorchHome(theme: theme, scheme: colorScheme, snapshot: snapshot, status: status, wide: wide)
+            SettingsView(theme: theme, appearance: appearance, onAppearance: onAppearance)
         }
     }
 }
