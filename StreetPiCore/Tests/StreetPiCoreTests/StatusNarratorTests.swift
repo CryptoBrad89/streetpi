@@ -6,7 +6,7 @@ final class StatusNarratorTests: XCTestCase {
 
     func testHealthyHomeIsCalm() {
         let status = StatusNarrator.narrate(.healthyFixture, now: now)
-        XCTAssertEqual(status.headline, "Everything at home is running.")
+        XCTAssertEqual(status.headline, "Everything's good.")
         XCTAssertNil(status.detail)
         XCTAssertEqual(status.tone, .calm)
         XCTAssertEqual(status.linkLine, "On the home network")
@@ -16,7 +16,7 @@ final class StatusNarratorTests: XCTestCase {
         var snapshot = HouseholdSnapshot.healthyFixture
         snapshot.services[0].state = .notResponding
         let status = StatusNarrator.narrate(snapshot, now: now)
-        XCTAssertEqual(status.headline, "Pi-hole is not responding.")
+        XCTAssertEqual(status.headline, "The ad blocker is down.")
         XCTAssertEqual(status.tone, .problem)
         XCTAssertNil(status.detail)
     }
@@ -24,10 +24,10 @@ final class StatusNarratorTests: XCTestCase {
     func testSeveralServicesDownStayPlural() {
         var snapshot = HouseholdSnapshot.healthyFixture
         snapshot.services[0].state = .notResponding
-        snapshot.services[2].state = .notResponding
+        snapshot.services[4].state = .notResponding
         let status = StatusNarrator.narrate(snapshot, now: now)
         XCTAssertEqual(status.headline, "A few things at home need a look.")
-        XCTAssertEqual(status.detail, "Pi-hole and Home Assistant are not responding.")
+        XCTAssertEqual(status.detail, "Pi-hole and Home Assistant are down.")
         XCTAssertEqual(status.tone, .problem)
     }
 
@@ -69,7 +69,7 @@ final class StatusNarratorTests: XCTestCase {
         snapshot.link = .away(cachedAt: cachedAt)
         snapshot.capturedAt = cachedAt
         let status = StatusNarrator.narrate(snapshot, now: now)
-        XCTAssertEqual(status.headline, "Everything at home is running.")
+        XCTAssertEqual(status.headline, "Everything's good.")
         XCTAssertEqual(status.detail, "You're away from home. This reading is from 12 minutes ago.")
         XCTAssertEqual(status.linkLine, "Away · 12 minutes ago")
         XCTAssertEqual(status.tone, .calm)
@@ -77,9 +77,25 @@ final class StatusNarratorTests: XCTestCase {
 
     func testProblemWhileAwayKeepsTheProblem() {
         let status = StatusNarrator.narrate(.awayTroubleFixture, now: now)
-        XCTAssertEqual(status.headline, "Pi-hole is not responding.")
+        XCTAssertEqual(status.headline, "The ad blocker is down.")
         XCTAssertEqual(status.tone, .problem)
         XCTAssertEqual(status.detail, "You're away from home. This reading is from 12 minutes ago.")
+    }
+
+    func testStaleCacheAsksForCaution() {
+        let status = StatusNarrator.narrate(.staleFixture, now: now)
+        XCTAssertEqual(status.headline, "Everything's good.")
+        XCTAssertEqual(status.tone, .attention)
+        XCTAssertEqual(status.detail, "This reading is from 2 days ago and may be out of date.")
+        XCTAssertEqual(status.linkLine, "On the home network")
+    }
+
+    func testGroupsCoverTheHouse() {
+        let groups = HouseGuide.groups(in: .healthyFixture)
+        XCTAssertEqual(groups.map(\.id), HouseGroup.allCases)
+        XCTAssertEqual(groups[0].summary, "Ads are being blocked.")
+        XCTAssertEqual(groups[0].tone, .calm)
+        XCTAssertEqual(HouseGuide.groups(in: .emptyFixture), [])
     }
 
     func testAgePhrases() {

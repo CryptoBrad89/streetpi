@@ -4,7 +4,7 @@ import StreetPiCore
 struct AppShell: View {
     var section: AppSection
     var appearance: AppearancePreference
-    var snapshot: HouseholdSnapshot
+    var screen: HouseScreen
     var now: Date
     var onSection: (AppSection) -> Void
     var onAppearance: (AppearancePreference) -> Void
@@ -17,7 +17,12 @@ struct AppShell: View {
     }
 
     private var status: PlainEnglishStatus {
-        StatusNarrator.narrate(snapshot, now: now)
+        screen.status(now: now)
+    }
+
+    private var groups: [GroupBrief] {
+        guard let snapshot = screen.snapshot else { return [] }
+        return HouseGuide.groups(in: snapshot)
     }
 
     var body: some View {
@@ -65,6 +70,9 @@ struct AppShell: View {
                 .padding(.bottom, Rhythm.line)
                 .accessibilityAddTraits(.isHeader)
             sidebarButton("Home", section: .home)
+            ForEach(groups) { group in
+                sidebarButton(group.title, section: .group(group.id))
+            }
             sidebarButton("Settings", section: .settings)
             Spacer(minLength: 0)
         }
@@ -94,7 +102,7 @@ struct AppShell: View {
     }
 
     private var phoneChrome: some View {
-        let title = Text("StreetPi")
+        let title = Text(chromeTitle)
             .font(.caption)
             .foregroundStyle(theme.tertiary)
             .textCase(.uppercase)
@@ -123,13 +131,27 @@ struct AppShell: View {
         .padding(.top, Rhythm.tight)
     }
 
+    private var chromeTitle: String {
+        switch section {
+        case .home, .settings:
+            "StreetPi"
+        case .group(let group):
+            group.title
+        }
+    }
+
     @ViewBuilder
     private var chromeButton: some View {
-        if section == .settings {
+        switch section {
+        case .group:
+            IconChromeButton(title: "Home", systemImage: "chevron.backward") {
+                onSection(.home)
+            }
+        case .settings:
             IconChromeButton(title: "Home", systemImage: "house") {
                 onSection(.home)
             }
-        } else {
+        case .home:
             IconChromeButton(title: "Settings", systemImage: "gearshape") {
                 onSection(.settings)
             }
@@ -140,9 +162,48 @@ struct AppShell: View {
     private func detail(wide: Bool) -> some View {
         switch section {
         case .home:
-            HomeView(theme: theme, scheme: colorScheme, snapshot: snapshot, status: status, wide: wide)
+            HomeView(
+                theme: theme,
+                scheme: colorScheme,
+                snapshot: screen.snapshot,
+                status: status,
+                lines: lines,
+                groups: groups,
+                wide: wide,
+                onGroup: { onSection(.group($0)) }
+            )
+        case .group(let group):
+            if let brief = groups.first(where: { $0.id == group }) {
+                GroupDashboard(
+                    theme: theme,
+                    brief: brief,
+                    machine: screen.snapshot?.machine,
+                    wide: wide
+                )
+            } else {
+                HomeView(
+                    theme: theme,
+                    scheme: colorScheme,
+                    snapshot: nil,
+                    status: PlainEnglishStatus(
+                        headline: "Nothing in \(group.title) yet.",
+                        detail: nil,
+                        tone: .calm,
+                        linkLine: status.linkLine
+                    ),
+                    lines: [],
+                    groups: [],
+                    wide: wide,
+                    onGroup: { _ in }
+                )
+            }
         case .settings:
             SettingsView(theme: theme, appearance: appearance, onAppearance: onAppearance)
         }
+    }
+
+    private var lines: [String] {
+        guard let snapshot = screen.snapshot, !snapshot.isEmptyHouse else { return [] }
+        return HouseholdVoice.porchLines(snapshot)
     }
 }

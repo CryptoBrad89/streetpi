@@ -3,7 +3,7 @@ import StreetPiCore
 
 struct RootView: View {
     var now: Date
-    @State private var snapshot = HouseholdSnapshot.healthyFixture
+    @State private var screen = HouseScreen.ready(.healthyFixture)
     @State private var section = AppSection.home
     @State private var showIntro = true
     @Environment(\.colorScheme) private var colorScheme
@@ -18,7 +18,7 @@ struct RootView: View {
             AppShell(
                 section: section,
                 appearance: appearance,
-                snapshot: snapshot,
+                screen: screen,
                 now: now,
                 onSection: { section = $0 },
                 onAppearance: { appearanceRaw = $0.rawValue }
@@ -36,7 +36,7 @@ struct RootView: View {
             let clock = now
             let loader = HouseholdStatusLoader.healthyFixture { clock }
             if let loaded = try? await loader.load() {
-                snapshot = loaded
+                screen = .ready(loaded)
             }
         }
     }

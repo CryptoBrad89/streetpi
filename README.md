@@ -6,7 +6,7 @@ The screen is drawn from fake fixtures. It does not talk to the Pi, the router, 
 
 ## Look
 
-One direction. A warm rounded card says how the house is doing. Under it, labelled meters (Processor, Temperature, Memory, Disk) and a plain list of services. Dark is the primary design. Light mode is cream. Settings has Appearance: System, Dark, Light.
+One direction. A warm rounded card says how the house is doing. Under it, labelled meters (Processor, Temperature, Memory, Disk), then a card for each part of the house. Dark is the primary design. Light mode is cream. Settings has Appearance: System, Dark, Light.
 
 ## Layout
 

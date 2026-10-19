@@ -11,11 +11,35 @@ final class DesignSnapshotTests: XCTestCase {
     private let house = HouseholdSnapshot.healthyFixture
 
     func testHome() {
-        assertMatrix(section: .home, snapshot: house, testName: "home")
+        assertMatrix(section: .home, screen: .ready(house), testName: "home")
+    }
+
+    func testAway() {
+        assertMatrix(section: .home, screen: .ready(.awayFreshFixture), testName: "away")
+    }
+
+    func testError() {
+        assertMatrix(section: .home, screen: .failed, testName: "error")
+    }
+
+    func testStale() {
+        assertMatrix(section: .home, screen: .ready(.staleFixture), testName: "stale")
+    }
+
+    func testEmpty() {
+        assertMatrix(section: .home, screen: .empty, testName: "empty")
+    }
+
+    func testAdBlocker() {
+        assertMatrix(section: .group(.adBlockerAndDNS), screen: .ready(house), testName: "ad-blocker")
+    }
+
+    func testPiHealth() {
+        assertMatrix(section: .group(.piHealth), screen: .ready(house), testName: "pi-health")
     }
 
     func testSettings() {
-        assertMatrix(section: .settings, snapshot: house, testName: "settings")
+        assertMatrix(section: .settings, screen: .ready(house), testName: "settings")
     }
 
     func testIntro() {
@@ -39,14 +63,14 @@ final class DesignSnapshotTests: XCTestCase {
         }
     }
 
-    private func assertMatrix(section: AppSection, snapshot: HouseholdSnapshot, testName: String) {
+    private func assertMatrix(section: AppSection, screen: HouseScreen, testName: String) {
         for scheme in [ColorScheme.dark, ColorScheme.light] {
             for size in SnapshotScale.allCases {
                 for device in SnapshotDevice.allCases {
                     let view = AppShell(
                         section: section,
                         appearance: scheme == .dark ? .dark : .light,
-                        snapshot: snapshot,
+                        screen: screen,
                         now: now,
                         onSection: { _ in },
                         onAppearance: { _ in }
