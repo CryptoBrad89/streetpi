@@ -62,6 +62,7 @@ enum HouseScreen: Equatable {
 enum AppSection: Hashable {
     case home
     case group(HouseGroup)
+    case alerts
     case settings
 }
 

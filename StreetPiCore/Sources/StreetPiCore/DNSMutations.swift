@@ -12,7 +12,7 @@ extension DNSDesk {
             copy.upsert(name, detail: "Blocked")
         case .allowDomain(let name):
             copy.upsert(name, detail: "Allowed")
-        case .refresh, .reboot, .shutDown, .stopService, .deleteFiles, .killProcess, .signOutOfAdBlocker:
+        case .refresh, .signOutOfAdBlocker:
             break
         }
         return copy

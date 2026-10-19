@@ -3,11 +3,6 @@ import Foundation
 /// What the house is about to do. The confirmation protects the action, whoever is holding the phone.
 public enum HouseholdAction: Sendable, Equatable {
     case refresh
-    case reboot
-    case shutDown
-    case stopService(named: String)
-    case deleteFiles(count: Int)
-    case killProcess(named: String)
     case pauseAdBlocking(PauseLength)
     case resumeAdBlocking
     case blockDomain(named: String)
@@ -42,41 +37,11 @@ public enum ActionPolicy {
         if action == .refresh {
             return .notRequired
         }
-        if isDestructive(action) {
-            return .explainAndUseFaceID(destructiveCopy(action))
-        }
         return .explain(plainCopy(action))
-    }
-
-    private static func isDestructive(_ action: HouseholdAction) -> Bool {
-        switch action {
-        case .reboot, .shutDown, .deleteFiles, .killProcess:
-            true
-        default:
-            false
-        }
-    }
-
-    private static func destructiveCopy(_ action: HouseholdAction) -> String {
-        switch action {
-        case .reboot:
-            return "The Pi will restart. Ad blocking and the other house services will drop out for a few minutes."
-        case .shutDown:
-            return "The Pi will turn off and stay off until someone switches the power back on."
-        case .deleteFiles(let count):
-            let noun = count == 1 ? "1 item" : "\(max(count, 0)) items"
-            return "This will permanently delete \(noun) from the Pi. They cannot be undone."
-        case .killProcess(let name):
-            return "\(name) will be forced to quit. Anything it was doing stops immediately."
-        default:
-            return "This change is hard to undo."
-        }
     }
 
     private static func plainCopy(_ action: HouseholdAction) -> String {
         switch action {
-        case .stopService(let name):
-            return "\(name) will stop until someone starts it again. The rest of the house stays up."
         case .pauseAdBlocking(let length):
             return pauseCopy(length)
         case .resumeAdBlocking:
