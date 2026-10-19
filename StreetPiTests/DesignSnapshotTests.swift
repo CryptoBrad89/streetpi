@@ -143,8 +143,59 @@ final class DesignSnapshotTests: XCTestCase {
         )
     }
 
-    func testPiHealth() {
-        assertMatrix(section: .group(.piHealth), screen: .ready(house), testName: "pi-health")
+    func testDNSTodayLive() {
+        assertMatrix(
+            section: .group(.adBlockerAndDNS),
+            screen: .ready(house),
+            testName: "dns-today-live",
+            dnsPage: .today,
+            desk: .loggingOnFixture
+        )
+    }
+
+    func testDNSLocalWritable() {
+        assertMatrix(
+            section: .group(.adBlockerAndDNS),
+            screen: .ready(house),
+            testName: "dns-local-writable",
+            dnsPage: .localNames,
+            desk: .loggingOnFixture
+        )
+    }
+
+    func testMachineDashboard() {
+        assertMatrix(section: .group(.piHealth), screen: .ready(house), testName: "machine-dashboard")
+    }
+
+    func testMachineChart() {
+        assertMatrix(
+            section: .group(.piHealth),
+            screen: .ready(house),
+            testName: "machine-chart",
+            machinePage: .chart
+        )
+    }
+
+    func testMachineServices() {
+        assertMatrix(
+            section: .group(.piHealth),
+            screen: .ready(house),
+            testName: "machine-services",
+            machinePage: .services
+        )
+    }
+
+    func testMachineContainers() {
+        assertMatrix(
+            section: .group(.piHealth),
+            screen: .ready(house),
+            testName: "machine-containers",
+            machinePage: .containers
+        )
+    }
+
+    func testAlerts() {
+        assertMatrix(section: .alerts, screen: .ready(house), testName: "alerts")
     }
 
     func testSettings() {
@@ -177,6 +228,8 @@ final class DesignSnapshotTests: XCTestCase {
         screen: HouseScreen,
         testName: String,
         dnsPage: DNSPage? = nil,
+        desk: DNSDesk = .houseFixture,
+        machinePage: MachinePage? = nil,
         pending: HouseholdAction? = nil
     ) {
         for scheme in [ColorScheme.dark, ColorScheme.light] {
@@ -189,7 +242,9 @@ final class DesignSnapshotTests: XCTestCase {
                         now: now,
                         onSection: { _ in },
                         onAppearance: { _ in },
+                        desk: desk,
                         dnsPage: dnsPage,
+                        machinePage: machinePage,
                         pendingAction: pending
                     )
                     .environment(\.colorScheme, scheme)

@@ -8,6 +8,8 @@ struct RootView: View {
     @State private var showIntro = true
     @State private var desk = DNSDesk.houseFixture
     @State private var dnsPage: DNSPage?
+    @State private var machine = MachineDesk.houseFixture
+    @State private var machinePage: MachinePage?
     @State private var pending: HouseholdAction?
     @State private var passwordSaved = false
     @State private var showPassword = false
@@ -31,13 +33,19 @@ struct RootView: View {
                     if next != .group(.adBlockerAndDNS) {
                         dnsPage = nil
                     }
+                    if next != .group(.piHealth) {
+                        machinePage = nil
+                    }
                 },
                 onAppearance: { appearanceRaw = $0.rawValue },
                 desk: desk,
                 dnsPage: dnsPage,
+                machine: machine,
+                machinePage: machinePage,
                 pendingAction: pending,
                 passwordSaved: passwordSaved,
                 onDNSPage: { dnsPage = $0 },
+                onMachinePage: { machinePage = $0 },
                 onPending: { pending = $0 },
                 onConfirm: { action in
                     Task { await confirm(action) }

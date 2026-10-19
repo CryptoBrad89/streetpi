@@ -85,9 +85,11 @@ public enum DNSCopy {
     public static let topListsDetail = """
     Those lists come from the query log, and logging is off. Ads are still being blocked.
     """
-    public static let chartCaption = """
-    Query logging is off, so a live chart would be empty. This sample shows the shape of the last day.
+    public static let chartEmptyTitle = "Nothing to chart."
+    public static let chartEmptyDetail = """
+    Query logging is off, so there is no picture of the last day. Ads are still being blocked.
     """
+    public static let chartLiveCaption = "Lookups over the last day."
     public static let localNameNotice = """
     Saving a local name on the Pi needs a setting StreetPi will not change. You can still read the names here.
     """

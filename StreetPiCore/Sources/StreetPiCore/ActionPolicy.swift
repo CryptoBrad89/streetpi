@@ -3,12 +3,7 @@ import Foundation
 /// What the house is about to do. The confirmation protects the action, whoever is holding the phone.
 public enum HouseholdAction: Sendable, Equatable {
     case refresh
-    case reboot
-    case shutDown
-    case stopService(named: String)
-    case deleteFiles(count: Int)
     case changeDNSSettings
-    case killProcess(named: String)
     case pauseAdBlocking(PauseLength)
     case resumeAdBlocking
     case addDomain(named: String, blocked: Bool)
@@ -58,7 +53,7 @@ public enum ActionPolicy {
 
     private static func isDestructive(_ action: HouseholdAction) -> Bool {
         switch action {
-        case .reboot, .shutDown, .deleteFiles, .killProcess, .restartDNS, .flushQueryLog, .removeDNSEntry:
+        case .restartDNS, .flushQueryLog, .removeDNSEntry:
             true
         default:
             false
@@ -67,15 +62,6 @@ public enum ActionPolicy {
 
     private static func destructiveCopy(_ action: HouseholdAction) -> String {
         switch action {
-        case .reboot:
-            return "The Pi will restart. Ad blocking and the other house services will drop out for a few minutes."
-        case .shutDown:
-            return "The Pi will turn off and stay off until someone switches the power back on."
-        case .deleteFiles(let count):
-            let noun = count == 1 ? "1 item" : "\(max(count, 0)) items"
-            return "This will permanently delete \(noun) from the Pi. They cannot be undone."
-        case .killProcess(let name):
-            return "\(name) will be forced to quit. Anything it was doing stops immediately."
         case .restartDNS:
             return "DNS will restart. Devices may briefly fail to look up names."
         case .flushQueryLog:
@@ -89,8 +75,6 @@ public enum ActionPolicy {
 
     private static func plainCopy(_ action: HouseholdAction) -> String {
         switch action {
-        case .stopService(let name):
-            return "\(name) will stop until someone starts it again. The rest of the house stays up."
         case .changeDNSSettings:
             return "This changes how the house looks up names. Devices may briefly lose the network."
         case .pauseAdBlocking(let length):

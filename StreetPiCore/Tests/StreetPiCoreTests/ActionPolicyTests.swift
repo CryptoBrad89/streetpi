@@ -7,65 +7,48 @@ final class ActionPolicyTests: XCTestCase {
     }
 
     func testDestructiveActionsUseFaceIDAndSayWhatHappens() {
-        let reboot = ActionPolicy.confirmation(for: .reboot)
-        let shutdown = ActionPolicy.confirmation(for: .shutDown)
-        let deletion = ActionPolicy.confirmation(for: .deleteFiles(count: 3))
-        let kill = ActionPolicy.confirmation(for: .killProcess(named: "example-daemon"))
+        let restart = ActionPolicy.confirmation(for: .restartDNS)
+        let flush = ActionPolicy.confirmation(for: .flushQueryLog)
+        let removal = ActionPolicy.confirmation(for: .removeDNSEntry(.client, named: "Living room"))
 
-        for confirmation in [reboot, shutdown, deletion, kill] {
+        for confirmation in [restart, flush, removal] {
             XCTAssertTrue(confirmation.requiresFaceID)
             XCTAssertFalse(confirmation.explanation?.isEmpty ?? true)
         }
 
         XCTAssertEqual(
-            reboot.explanation,
-            "The Pi will restart. Ad blocking and the other house services will drop out for a few minutes."
+            restart.explanation,
+            "DNS will restart. Devices may briefly fail to look up names."
         )
         XCTAssertEqual(
-            shutdown.explanation,
-            "The Pi will turn off and stay off until someone switches the power back on."
+            flush.explanation,
+            "The saved lookup history will be erased. This cannot be undone."
         )
         XCTAssertEqual(
-            deletion.explanation,
-            "This will permanently delete 3 items from the Pi. They cannot be undone."
-        )
-        XCTAssertEqual(
-            ActionPolicy.confirmation(for: .deleteFiles(count: 1)).explanation,
-            "This will permanently delete 1 item from the Pi. They cannot be undone."
-        )
-        XCTAssertEqual(
-            kill.explanation,
-            "example-daemon will be forced to quit. Anything it was doing stops immediately."
+            removal.explanation,
+            "Living room will be removed for the whole house. This cannot be undone."
         )
     }
 
     func testWritesExplainThemselvesWithoutFaceID() {
-        let stop = ActionPolicy.confirmation(for: .stopService(named: "Media"))
         let dns = ActionPolicy.confirmation(for: .changeDNSSettings)
         let pause = ActionPolicy.confirmation(for: .pauseAdBlocking(.untilTurnedBackOn))
         let resume = ActionPolicy.confirmation(for: .resumeAdBlocking)
 
-        for confirmation in [stop, dns, pause, resume] {
+        for confirmation in [dns, pause, resume] {
             XCTAssertFalse(confirmation.requiresFaceID)
             XCTAssertFalse(confirmation.explanation?.isEmpty ?? true)
         }
-        XCTAssertTrue(stop.explanation?.contains("Media will stop") ?? false)
         XCTAssertTrue(pause.explanation?.contains("whole house") ?? false)
         let timed = ActionPolicy.confirmation(for: .pauseAdBlocking(.fiveMinutes))
         XCTAssertFalse(timed.requiresFaceID)
         XCTAssertTrue(timed.explanation?.contains("5 minutes") ?? false)
-        XCTAssertTrue(ActionPolicy.confirmation(for: .restartDNS).requiresFaceID)
-        XCTAssertTrue(ActionPolicy.confirmation(for: .flushQueryLog).requiresFaceID)
-        XCTAssertTrue(
-            ActionPolicy.confirmation(for: .removeDNSEntry(.client, named: "Living room")).requiresFaceID
-        )
         XCTAssertFalse(ActionPolicy.confirmation(for: .updateBlockLists).requiresFaceID)
     }
 
     func testCopyDoesNotNameAPersonOrAPrivateAddress() {
         let actions: [HouseholdAction] = [
-            .reboot, .shutDown, .stopService(named: "Media"), .deleteFiles(count: 2),
-            .changeDNSSettings, .killProcess(named: "example-daemon"),
+            .changeDNSSettings,
             .pauseAdBlocking(.fiveMinutes), .resumeAdBlocking,
             .restartDNS, .flushQueryLog, .updateBlockLists,
             .removeDNSEntry(.domain, named: "ads.example.test"),

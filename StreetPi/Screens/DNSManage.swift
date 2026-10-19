@@ -7,6 +7,7 @@ struct ManageScreen: View {
     var rows: [NamedRow]
     var notice: String?
     var addWord: String
+    var canWrite: Bool = true
     var theme: StreetTheme
     var wide: Bool
     var onAdd: (String) -> Void
@@ -35,7 +36,9 @@ struct ManageScreen: View {
             ForEach(rows) { row in
                 rowView(row)
             }
-            addField
+            if canWrite {
+                addField
+            }
         }
     }
 
@@ -43,11 +46,11 @@ struct ManageScreen: View {
         ViewThatFits(in: .horizontal) {
             HStack(alignment: .firstTextBaseline, spacing: Rhythm.line) {
                 labels(row)
-                remove(row.name)
+                if canWrite { remove(row.name) }
             }
             VStack(alignment: .leading, spacing: Rhythm.tight) {
                 labels(row)
-                remove(row.name)
+                if canWrite { remove(row.name) }
             }
         }
         .padding(Rhythm.line)

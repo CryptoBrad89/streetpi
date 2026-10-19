@@ -1,7 +1,7 @@
 import Foundation
 
 public struct PlainEnglishStatus: Sendable, Equatable {
-    public enum Tone: String, Sendable, Equatable {
+    public enum Tone: String, Sendable, Equatable, Codable {
         case calm
         case attention
         case problem

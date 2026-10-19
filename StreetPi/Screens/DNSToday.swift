@@ -35,7 +35,11 @@ struct DNSToday: View {
             }
             .accessibilityElement(children: .combine)
             timers
-            DayChart(samples: desk.day, caption: DNSCopy.chartCaption, theme: theme)
+            if desk.queryLoggingEnabled, !desk.day.isEmpty {
+                DayChart(samples: desk.day, caption: DNSCopy.chartLiveCaption, theme: theme)
+            } else {
+                EmptyNote(title: DNSCopy.chartEmptyTitle, detail: DNSCopy.chartEmptyDetail, theme: theme)
+            }
             facts
             Text("Lists updated \(AgePhrase.english(from: desk.listsUpdatedAt, to: now)).")
                 .font(.footnote)
@@ -44,12 +48,18 @@ struct DNSToday: View {
         }
     }
 
+    private var queryCount: String {
+        guard desk.queryLoggingEnabled else { return "Not counted" }
+        let total = desk.day.reduce(0) { $0 + $1.allowed + $1.blocked }
+        return "\(total)"
+    }
+
     private var facts: some View {
         VStack(alignment: .leading, spacing: Rhythm.line) {
             fact("Blocking", desk.blocking.enabled ? "On" : "Paused")
             fact("Devices", "\(desk.knownClients)")
             fact("Block lists", "\(desk.listCount)")
-            fact("Queries today", "Not counted")
+            fact("Queries today", queryCount)
         }
         .padding(Rhythm.line)
         .frame(maxWidth: .infinity, alignment: .leading)

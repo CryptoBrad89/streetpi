@@ -5,12 +5,14 @@ final class DNSDeskTests: XCTestCase {
     func testLoggingOffLeavesTheLogAndTopListsEmpty() {
         let desk = DNSDesk.houseFixture
         XCTAssertFalse(desk.queryLoggingEnabled)
-        XCTAssertTrue(desk.chartIsSample)
-        XCTAssertEqual(desk.day.count, 24)
+        XCTAssertFalse(desk.configWritesAllowed)
+        XCTAssertFalse(desk.chartIsSample)
+        XCTAssertTrue(desk.day.isEmpty)
+        XCTAssertTrue(desk.queries.isEmpty)
+        XCTAssertTrue(desk.topClients.isEmpty)
         XCTAssertEqual(DNSCopy.queryLogTitle, "Nothing to show.")
         XCTAssertTrue(DNSCopy.queryLogDetail.contains("Query logging is off"))
-        XCTAssertTrue(DNSCopy.topListsDetail.contains("logging is off"))
-        XCTAssertTrue(DNSCopy.chartCaption.contains("live chart would be empty"))
+        XCTAssertTrue(DNSCopy.chartEmptyDetail.contains("no picture of the last day"))
     }
 
     func testFixtureNamesStayOnTheSampleHost() {
@@ -50,6 +52,18 @@ final class DNSDeskTests: XCTestCase {
         XCTAssertFalse(removed.domains.contains { $0.name == "ads.example.test" })
         let added = removed.applying(.addBlockList(named: "Extra list"))
         XCTAssertEqual(added.lists.last?.host, "fixture.local")
+    }
+
+    func testLoggingOnFillsTheChartAndLocalNamesStayLockedUntilAllowed() {
+        let live = DNSDesk.loggingOnFixture
+        XCTAssertTrue(live.queryLoggingEnabled)
+        XCTAssertTrue(live.configWritesAllowed)
+        XCTAssertEqual(live.day.count, 24)
+        XCTAssertFalse(live.queries.isEmpty)
+        let locked = DNSDesk.houseFixture.applying(.addLocalName(named: "camera.fixture.local"))
+        XCTAssertFalse(locked.localNames.contains { $0.name == "camera.fixture.local" })
+        let saved = live.applying(.addLocalName(named: "camera.fixture.local"))
+        XCTAssertTrue(saved.localNames.contains { $0.name == "camera.fixture.local" })
     }
 
     func testPiSideAsksStayUnapplied() {
