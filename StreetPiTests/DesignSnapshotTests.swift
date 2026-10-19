@@ -34,6 +34,115 @@ final class DesignSnapshotTests: XCTestCase {
         assertMatrix(section: .group(.adBlockerAndDNS), screen: .ready(house), testName: "ad-blocker")
     }
 
+    func testDNSToday() {
+        assertMatrix(
+            section: .group(.adBlockerAndDNS),
+            screen: .ready(house),
+            testName: "dns-today",
+            dnsPage: .today
+        )
+    }
+
+    func testDNSStatistics() {
+        assertMatrix(
+            section: .group(.adBlockerAndDNS),
+            screen: .ready(house),
+            testName: "dns-statistics",
+            dnsPage: .statistics
+        )
+    }
+
+    func testQueryLog() {
+        assertMatrix(
+            section: .group(.adBlockerAndDNS),
+            screen: .ready(house),
+            testName: "dns-query-log",
+            dnsPage: .queryLog
+        )
+    }
+
+    func testLiveLog() {
+        assertMatrix(
+            section: .group(.adBlockerAndDNS),
+            screen: .ready(house),
+            testName: "dns-live-log",
+            dnsPage: .liveLog
+        )
+    }
+
+    func testDNSServices() {
+        assertMatrix(
+            section: .group(.adBlockerAndDNS),
+            screen: .ready(house),
+            testName: "dns-services",
+            dnsPage: .services
+        )
+    }
+
+    func testDNSClients() {
+        assertMatrix(
+            section: .group(.adBlockerAndDNS),
+            screen: .ready(house),
+            testName: "dns-clients",
+            dnsPage: .clients
+        )
+    }
+
+    func testDNSGroups() {
+        assertMatrix(
+            section: .group(.adBlockerAndDNS),
+            screen: .ready(house),
+            testName: "dns-groups",
+            dnsPage: .groups
+        )
+    }
+
+    func testDNSDomains() {
+        assertMatrix(
+            section: .group(.adBlockerAndDNS),
+            screen: .ready(house),
+            testName: "dns-domains",
+            dnsPage: .domains
+        )
+    }
+
+    func testDNSLists() {
+        assertMatrix(
+            section: .group(.adBlockerAndDNS),
+            screen: .ready(house),
+            testName: "dns-lists",
+            dnsPage: .lists
+        )
+    }
+
+    func testDNSLocalNames() {
+        assertMatrix(
+            section: .group(.adBlockerAndDNS),
+            screen: .ready(house),
+            testName: "dns-local",
+            dnsPage: .localNames
+        )
+    }
+
+    func testDNSUpkeep() {
+        assertMatrix(
+            section: .group(.adBlockerAndDNS),
+            screen: .ready(house),
+            testName: "dns-upkeep",
+            dnsPage: .upkeep
+        )
+    }
+
+    func testDNSConfirm() {
+        assertMatrix(
+            section: .group(.adBlockerAndDNS),
+            screen: .ready(house),
+            testName: "dns-confirm",
+            dnsPage: .upkeep,
+            pending: .restartDNS
+        )
+    }
+
     func testPiHealth() {
         assertMatrix(section: .group(.piHealth), screen: .ready(house), testName: "pi-health")
     }
@@ -63,7 +172,13 @@ final class DesignSnapshotTests: XCTestCase {
         }
     }
 
-    private func assertMatrix(section: AppSection, screen: HouseScreen, testName: String) {
+    private func assertMatrix(
+        section: AppSection,
+        screen: HouseScreen,
+        testName: String,
+        dnsPage: DNSPage? = nil,
+        pending: HouseholdAction? = nil
+    ) {
         for scheme in [ColorScheme.dark, ColorScheme.light] {
             for size in SnapshotScale.allCases {
                 for device in SnapshotDevice.allCases {
@@ -73,7 +188,9 @@ final class DesignSnapshotTests: XCTestCase {
                         screen: screen,
                         now: now,
                         onSection: { _ in },
-                        onAppearance: { _ in }
+                        onAppearance: { _ in },
+                        dnsPage: dnsPage,
+                        pendingAction: pending
                     )
                     .environment(\.colorScheme, scheme)
                     .environment(\.dynamicTypeSize, size.dynamicType)

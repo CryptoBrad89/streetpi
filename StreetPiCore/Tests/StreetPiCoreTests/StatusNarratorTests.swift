@@ -95,7 +95,23 @@ final class StatusNarratorTests: XCTestCase {
         XCTAssertEqual(groups.map(\.id), HouseGroup.allCases)
         XCTAssertEqual(groups[0].summary, "Ads are being blocked.")
         XCTAssertEqual(groups[0].tone, .calm)
+        XCTAssertEqual(
+            groups.first { $0.id == .internet }?.summary,
+            "The home's address on the internet is up to date."
+        )
         XCTAssertEqual(HouseGuide.groups(in: .emptyFixture), [])
+    }
+
+    func testInternetCardSpeaksPlainlyWhenTheAddressIsStale() {
+        var snapshot = HouseholdSnapshot.healthyFixture
+        guard let index = snapshot.services.firstIndex(where: { $0.kind == .internet }) else {
+            return XCTFail("Missing internet service")
+        }
+        snapshot.services[index].state = .notResponding
+        XCTAssertEqual(
+            HouseGuide.brief(.internet, in: snapshot)?.summary,
+            "The home's address on the internet is out of date."
+        )
     }
 
     func testAgePhrases() {
