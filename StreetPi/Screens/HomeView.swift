@@ -4,20 +4,27 @@ import StreetPiCore
 struct HomeView: View {
     var theme: StreetTheme
     var scheme: ColorScheme
-    var snapshot: HouseholdSnapshot
+    var snapshot: HouseholdSnapshot?
     var status: PlainEnglishStatus
+    var lines: [String]
+    var groups: [GroupBrief]
     var wide: Bool
+    var onGroup: (HouseGroup) -> Void
+
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Rhythm.block) {
                 statusCard
                 readings
-                services
+                if !groups.isEmpty {
+                    groupGrid
+                }
             }
             .padding(.horizontal, Rhythm.page)
             .padding(.vertical, Rhythm.block)
-            .frame(maxWidth: wide ? 720 : 560)
+            .frame(maxWidth: wide ? 880 : 560)
             .frame(maxWidth: .infinity)
         }
         .scrollIndicators(.hidden)
@@ -41,25 +48,27 @@ struct HomeView: View {
                         .foregroundStyle(theme.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                VStack(alignment: .leading, spacing: Rhythm.tight) {
-                    ForEach(HouseholdVoice.porchLines(snapshot), id: \.self) { line in
-                        Text(line)
-                            .font(.body)
-                            .foregroundStyle(theme.ink)
-                            .fixedSize(horizontal: false, vertical: true)
+                if !lines.isEmpty {
+                    VStack(alignment: .leading, spacing: Rhythm.tight) {
+                        ForEach(lines, id: \.self) { line in
+                            Text(line)
+                                .font(.body)
+                                .foregroundStyle(theme.ink)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
                     }
+                    .padding(.top, Rhythm.tight)
                 }
-                .padding(.top, Rhythm.tight)
             }
         }
     }
 
     private var readings: some View {
         VStack(alignment: .leading, spacing: Rhythm.block) {
-            if let cpu = snapshot.machine?.cpuUsedFraction {
+            if let cpu = snapshot?.machine?.cpuUsedFraction {
                 MeterRow(label: "Processor", value: ReadingText.percent(cpu), fraction: cpu, theme: theme)
             }
-            if let temperature = snapshot.machine?.temperatureCelsius {
+            if let temperature = snapshot?.machine?.temperatureCelsius {
                 MeterRow(
                     label: "Temperature",
                     value: "\(ReadingText.celsius(temperature))  \(ReadingText.warmth(temperature))",
@@ -67,30 +76,26 @@ struct HomeView: View {
                     theme: theme
                 )
             }
-            if let memory = snapshot.machine?.memoryUsedFraction {
+            if let memory = snapshot?.machine?.memoryUsedFraction {
                 MeterRow(label: "Memory", value: ReadingText.percent(memory), fraction: memory, theme: theme)
             }
-            if let disk = snapshot.machine?.diskUsedFraction {
+            if let disk = snapshot?.machine?.diskUsedFraction {
                 MeterRow(label: "Disk", value: ReadingText.percent(disk), fraction: disk, theme: theme)
             }
         }
     }
 
-    private var services: some View {
-        VStack(alignment: .leading, spacing: Rhythm.line) {
-            Text("Services")
-                .font(.footnote)
-                .foregroundStyle(theme.tertiary)
-                .textCase(.uppercase)
-                .tracking(1.1)
-            ForEach(snapshot.services) { service in
-                ServiceRow(name: service.name, state: ReadingText.stateWord(for: service), theme: theme)
-                Rectangle()
-                    .fill(theme.hairline)
-                    .frame(height: 1)
+    private var groupGrid: some View {
+        let columns = wide && !dynamicTypeSize.isAccessibilitySize
+            ? [GridItem(.flexible(), spacing: Rhythm.line), GridItem(.flexible(), spacing: Rhythm.line)]
+            : [GridItem(.flexible())]
+        return LazyVGrid(columns: columns, alignment: .leading, spacing: Rhythm.line) {
+            ForEach(groups) { group in
+                GroupCard(group: group, theme: theme) {
+                    onGroup(group.id)
+                }
             }
         }
-        .padding(.top, Rhythm.line)
     }
 }
 
@@ -198,7 +203,7 @@ private struct MeterRow: View {
     }
 }
 
-private struct ServiceRow: View {
+struct ServiceRow: View {
     var name: String
     var state: String
     var theme: StreetTheme

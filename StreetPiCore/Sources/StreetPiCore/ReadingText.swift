@@ -68,6 +68,12 @@ public enum ReadingText {
                 return "Blocking"
             case .resolver:
                 return "Answering"
+            case .backup:
+                return "Copied"
+            case .internet:
+                return "Updating"
+            case .remoteHelp:
+                return "Ready"
             default:
                 return "Up"
             }

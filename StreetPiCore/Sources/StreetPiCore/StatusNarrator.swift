@@ -24,12 +24,12 @@ public enum StatusNarrator {
     public static func narrate(_ snapshot: HouseholdSnapshot, now: Date) -> PlainEnglishStatus {
         let notes = findings(in: snapshot).sorted { $0.rank < $1.rank }
         let headline: String
-        let tone: PlainEnglishStatus.Tone
+        var tone: PlainEnglishStatus.Tone
         if let primary = notes.first {
             headline = primary.headline
             tone = primary.tone
         } else {
-            headline = "Everything at home is running."
+            headline = "Everything's good."
             tone = .calm
         }
 
@@ -44,12 +44,33 @@ public enum StatusNarrator {
             parts.append(note.note ?? note.headline)
         }
 
+        let stale = CacheFreshness.isStale(snapshot, now: now)
+        if stale {
+            let age = AgePhrase.english(from: snapshot.referenceDate, to: now)
+            let line = "This reading is from \(age) and may be out of date."
+            if case .away = snapshot.link, !parts.isEmpty {
+                parts[0] = "You're away from home. \(line)"
+            } else {
+                parts.append(line)
+            }
+            if tone == .calm {
+                tone = .attention
+            }
+        }
+
         return PlainEnglishStatus(
             headline: headline,
             detail: parts.isEmpty ? nil : parts.joined(separator: " "),
             tone: tone,
             linkLine: linkLine(snapshot, now: now)
         )
+    }
+
+    private static func downHeadline(_ service: ServiceHealth) -> String {
+        if service.kind == .dnsFilter {
+            return "The ad blocker is down."
+        }
+        return "\(service.name) is down."
     }
 
     private struct Finding {
@@ -66,7 +87,7 @@ public enum StatusNarrator {
 
         if down.count == 1, let only = down.first {
             notes.append(
-                Finding(rank: 0, tone: .problem, headline: "\(only.name) is not responding.", note: nil)
+                Finding(rank: 0, tone: .problem, headline: downHeadline(only), note: nil)
             )
         } else if down.count > 1 {
             notes.append(
@@ -74,7 +95,7 @@ public enum StatusNarrator {
                     rank: 0,
                     tone: .problem,
                     headline: "A few things at home need a look.",
-                    note: "\(englishList(down.map(\.name))) are not responding."
+                    note: "\(englishList(down.map(\.name))) are down."
                 )
             )
         }

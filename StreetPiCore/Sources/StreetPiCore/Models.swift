@@ -81,6 +81,9 @@ public enum ServiceKind: String, Sendable, Equatable, Codable, CaseIterable {
     case resolver
     case homeAutomation
     case media
+    case remoteHelp
+    case internet
+    case backup
     case statusPage
     case telemetry
     case other

@@ -1,3 +1,4 @@
+import StreetPiCore
 import SwiftUI
 
 enum AppearancePreference: String, CaseIterable, Identifiable {
@@ -24,8 +25,43 @@ enum AppearancePreference: String, CaseIterable, Identifiable {
     }
 }
 
-enum AppSection: Equatable {
+enum HouseScreen: Equatable {
+    case ready(HouseholdSnapshot)
+    case empty
+    case failed
+
+    func status(now: Date) -> PlainEnglishStatus {
+        switch self {
+        case .ready(let snapshot):
+            StatusNarrator.narrate(snapshot, now: now)
+        case .empty:
+            PlainEnglishStatus(
+                headline: "Nothing to show yet.",
+                detail: "StreetPi has no reading for the house.",
+                tone: .calm,
+                linkLine: "On the home network"
+            )
+        case .failed:
+            PlainEnglishStatus(
+                headline: "StreetPi couldn't read the house.",
+                detail: "Nothing was changed. The last try failed.",
+                tone: .problem,
+                linkLine: "No reading"
+            )
+        }
+    }
+
+    var snapshot: HouseholdSnapshot? {
+        if case .ready(let snapshot) = self {
+            return snapshot
+        }
+        return nil
+    }
+}
+
+enum AppSection: Hashable {
     case home
+    case group(HouseGroup)
     case settings
 }
 

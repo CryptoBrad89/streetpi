@@ -28,15 +28,39 @@
       "state": "responding"
     },
     {
+      "id": "mediaflow",
+      "kind": "media",
+      "name": "MediaFlow",
+      "state": "responding"
+    },
+    {
+      "id": "aiostreams",
+      "kind": "media",
+      "name": "AIOStreams",
+      "state": "responding"
+    },
+    {
       "id": "home-assistant",
       "kind": "homeAutomation",
       "name": "Home Assistant",
       "state": "responding"
     },
     {
-      "id": "media",
-      "kind": "media",
-      "name": "Media",
+      "id": "rustdesk",
+      "kind": "remoteHelp",
+      "name": "RustDesk",
+      "state": "responding"
+    },
+    {
+      "id": "duckdns",
+      "kind": "internet",
+      "name": "DuckDNS",
+      "state": "responding"
+    },
+    {
+      "id": "sd-copy",
+      "kind": "backup",
+      "name": "Weekly SD copy",
       "state": "responding"
     }
   ]
