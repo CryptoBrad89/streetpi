@@ -28,5 +28,5 @@ runtime = candidates[-1][0]
 names = [name for item_runtime, name in candidates if item_runtime == runtime]
 preferred = [name for name in names if "Pro" in name]
 chosen = preferred[-1] if preferred else names[-1]
-print(f"platform=iOS Simulator,name={chosen}")
+print(f"platform=iOS Simulator,name={chosen},arch=arm64")
 PY
