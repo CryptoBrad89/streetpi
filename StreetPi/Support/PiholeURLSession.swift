@@ -85,16 +85,8 @@ private final class PiholeTrustDelegate: NSObject, URLSessionDelegate, @unchecke
         return PiholeCertificate(
             host: PiholeEndpoint.house.host,
             commonName: name,
-            notAfter: expiry(of: leaf) ?? Date(timeIntervalSince1970: 0),
+            notAfter: CertificateValidity.notAfter(der: data) ?? Date(timeIntervalSince1970: 0),
             sha256Fingerprint: "SHA256:\(hex)"
         )
-    }
-
-    private static func expiry(of certificate: SecCertificate) -> Date? {
-        let keys = [kSecOIDX509V1ValidityNotAfter] as CFArray
-        guard let values = SecCertificateCopyValues(certificate, keys, nil) as? [CFString: Any],
-              let entry = values[kSecOIDX509V1ValidityNotAfter] as? [CFString: Any]
-        else { return nil }
-        return entry[kSecPropertyKeyValue] as? Date
     }
 }

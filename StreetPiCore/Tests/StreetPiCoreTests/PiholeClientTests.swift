@@ -174,6 +174,22 @@ final class PiholeClientTests: XCTestCase {
         }
     }
 
+    func testCertificateNotAfterIsReadFromTheBytes() {
+        let validity = der(0x30, der(0x17, ascii("250101000000Z")) + der(0x18, ascii("20551231235959Z")))
+        let version = der(0xA0, der(0x02, [0x02]))
+        let tbs = der(0x30, version + der(0x02, [0x01]) + der(0x30, []) + der(0x30, []) + validity)
+        let certificate = der(0x30, tbs + der(0x30, []) + der(0x03, [0x00]))
+        let date = CertificateValidity.notAfter(der: Data(certificate))
+        var calendar = Calendar(identifier: .gregorian)
+        if let zone = TimeZone(secondsFromGMT: 0) {
+            calendar.timeZone = zone
+        }
+        XCTAssertEqual(calendar.component(.year, from: date ?? .distantPast), 2_055)
+        XCTAssertEqual(calendar.component(.month, from: date ?? .distantPast), 12)
+        XCTAssertEqual(calendar.component(.day, from: date ?? .distantPast), 31)
+        XCTAssertNil(CertificateValidity.notAfter(der: Data([0x00])))
+    }
+
     func testReadsDecodeRealShapes() throws {
         let ending = Date.streetFixtureNow
         let stamp = Int(ending.timeIntervalSince1970 - 86_400 + 3_605)
@@ -210,6 +226,14 @@ final class PiholeClientTests: XCTestCase {
     }
 
     private static let fixturePassword = "fixture-not-a-real-password"
+}
+
+private func der(_ tag: UInt8, _ body: [UInt8]) -> [UInt8] {
+    [tag, UInt8(body.count)] + body
+}
+
+private func ascii(_ text: String) -> [UInt8] {
+    Array(text.utf8)
 }
 
 private final class Clock: @unchecked Sendable {
