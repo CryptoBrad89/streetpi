@@ -1,6 +1,7 @@
 import Foundation
 import Security
 import StreetPiCore
+import SwiftUI
 
 struct KeychainSecretStore: SecretStoring, Sendable {
     private let service = "com.streetfam.streetpi.secrets"
