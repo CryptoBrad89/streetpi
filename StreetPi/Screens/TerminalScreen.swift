@@ -22,12 +22,9 @@ struct TerminalScreen: View {
                 .font(.subheadline)
                 .foregroundStyle(theme.secondary)
                 .fixedSize(horizontal: false, vertical: true)
-            Text(transcript)
-                .font(.body.monospaced())
-                .foregroundStyle(theme.ink)
-                .fixedSize(horizontal: false, vertical: true)
             TermHost(transcript: transcript)
-                .frame(minHeight: 180)
+                .frame(maxWidth: .infinity, minHeight: 220, alignment: .topLeading)
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .accessibilityIdentifier(SSHLibraryAnchor.name)
         }
     }
