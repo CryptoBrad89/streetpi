@@ -35,7 +35,8 @@ struct TermHost: UIViewRepresentable {
 
     func makeUIView(context: Context) -> TerminalView {
         let view = TerminalView(frame: .zero, font: nil)
-        view.feed(text: transcript)
+        // Hide the block cursor so the sample does not end on a stray mark.
+        view.feed(text: transcript + "\u{001B}[?25l")
         return view
     }
 
