@@ -12,6 +12,7 @@ struct AppShell: View {
     var onDirection: (DesignDirection) -> Void
 
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     private var theme: StreetTheme {
         direction.theme(colorScheme)
@@ -59,8 +60,10 @@ struct AppShell: View {
     private var sidebar: some View {
         VStack(alignment: .leading, spacing: Rhythm.line) {
             Text("StreetPi")
-                .font(.system(.title3, design: .serif))
+                .font(wordmark)
                 .foregroundStyle(theme.ink)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
                 .padding(.bottom, Rhythm.line)
                 .accessibilityAddTraits(.isHeader)
             sidebarButton("Home", section: .home)
@@ -81,6 +84,9 @@ struct AppShell: View {
         }
         .font(.body.weight(selected ? .semibold : .regular))
         .foregroundStyle(selected ? theme.ink : theme.secondary)
+        .multilineTextAlignment(.leading)
+        .lineLimit(2)
+        .minimumScaleFactor(0.7)
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.vertical, 10)
         .padding(.horizontal, 12)
@@ -93,25 +99,57 @@ struct AppShell: View {
     }
 
     private var phoneChrome: some View {
-        HStack {
-            Text(direction.title)
-                .font(.caption)
-                .foregroundStyle(theme.tertiary)
-                .textCase(.uppercase)
-                .tracking(1.2)
-            Spacer()
-            if section == .settings {
-                IconChromeButton(title: "Home", systemImage: "house") {
-                    onSection(.home)
+        let title = Text(direction.title)
+            .font(.caption)
+            .foregroundStyle(theme.tertiary)
+            .textCase(.uppercase)
+            .tracking(dynamicTypeSize.isAccessibilitySize ? 0 : 1.2)
+            .lineLimit(1)
+            .minimumScaleFactor(0.5)
+        return Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: Rhythm.tight) {
+                    HStack {
+                        Spacer(minLength: 0)
+                        chromeButton
+                    }
+                    title
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
             } else {
-                IconChromeButton(title: "Settings", systemImage: "gearshape") {
-                    onSection(.settings)
+                HStack(spacing: Rhythm.line) {
+                    title
+                    Spacer(minLength: Rhythm.line)
+                    chromeButton
                 }
             }
         }
         .padding(.horizontal, Rhythm.page)
         .padding(.top, Rhythm.tight)
+    }
+
+    @ViewBuilder
+    private var chromeButton: some View {
+        if section == .settings {
+            IconChromeButton(title: "Home", systemImage: "house") {
+                onSection(.home)
+            }
+        } else {
+            IconChromeButton(title: "Settings", systemImage: "gearshape") {
+                onSection(.settings)
+            }
+        }
+    }
+
+    private var wordmark: Font {
+        switch direction {
+        case .lampblack:
+            .system(.title3, design: .serif)
+        case .harbor:
+            .system(.title3, design: .monospaced)
+        case .porch:
+            .system(.title3, design: .rounded)
+        }
     }
 
     @ViewBuilder

@@ -34,7 +34,7 @@ final class DesignSnapshotTests: XCTestCase {
                     let view = IntroView(theme: theme, animatesIn: false) {}
                         .environment(\.colorScheme, scheme)
                         .environment(\.dynamicTypeSize, size.dynamicType)
-                        .environment(\.accessibilityReduceMotion, true)
+                        .environment(\.streetPiStill, true)
                     assertSnapshot(
                         of: view,
                         as: .image(
@@ -69,7 +69,7 @@ final class DesignSnapshotTests: XCTestCase {
                     )
                     .environment(\.colorScheme, scheme)
                     .environment(\.dynamicTypeSize, size.dynamicType)
-                    .environment(\.accessibilityReduceMotion, true)
+                    .environment(\.streetPiStill, true)
                     assertSnapshot(
                         of: view,
                         as: .image(

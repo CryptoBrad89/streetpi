@@ -10,6 +10,7 @@ struct PorchHome: View {
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.streetPiStill) private var still
 
     var body: some View {
         ScrollView {
@@ -28,22 +29,36 @@ struct PorchHome: View {
     private var card: some View {
         PorchCard(theme: theme, scheme: scheme) {
             VStack(alignment: .leading, spacing: Rhythm.line) {
-                HStack(alignment: .center, spacing: Rhythm.line) {
+                HStack(alignment: .firstTextBaseline, spacing: Rhythm.line) {
                     Image(systemName: "house.fill")
                         .font(.title2)
                         .foregroundStyle(theme.accent)
-                        .symbolEffect(.pulse, options: .repeating, isActive: status.tone == .calm && !reduceMotion)
+                        .symbolEffect(
+                            .pulse,
+                            options: .repeating,
+                            isActive: status.tone == .calm && !reduceMotion && !still
+                        )
                         .accessibilityHidden(true)
+                        .fixedSize()
+                        .layoutPriority(1)
                     Text(status.linkLine)
                         .font(.subheadline)
                         .foregroundStyle(theme.secondary)
-                    Spacer(minLength: 0)
+                        .lineLimit(3)
+                        .minimumScaleFactor(0.7)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     ToneMark(tone: status.tone, theme: theme)
+                        .fixedSize()
+                        .layoutPriority(1)
                 }
                 Text(status.headline)
                     .font(.system(.title, design: .rounded, weight: .semibold))
                     .foregroundStyle(theme.ink)
+                    .lineLimit(5)
+                    .minimumScaleFactor(0.55)
                     .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .accessibilityAddTraits(.isHeader)
                 if let detail = status.detail {
                     Text(detail)

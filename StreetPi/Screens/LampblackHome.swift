@@ -23,16 +23,25 @@ struct LampblackHome: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: Rhythm.line) {
-            HStack(spacing: 8) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
                 ToneMark(tone: status.tone, theme: theme)
+                    .fixedSize()
+                    .layoutPriority(1)
                 Text(status.linkLine)
                     .font(.subheadline)
                     .foregroundStyle(theme.secondary)
+                    .lineLimit(3)
+                    .minimumScaleFactor(0.7)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
             Text(status.headline)
                 .font(.system(.largeTitle, design: .serif))
                 .foregroundStyle(theme.ink)
+                .lineLimit(5)
+                .minimumScaleFactor(0.55)
                 .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .accessibilityAddTraits(.isHeader)
             Capsule()
                 .fill(theme.tone(status.tone))

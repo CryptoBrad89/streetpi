@@ -11,8 +11,11 @@ struct SettingsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Rhythm.block) {
                 Text("Settings")
-                    .font(.system(.largeTitle, design: .serif))
+                    .font(.system(.largeTitle, design: titleDesign))
                     .foregroundStyle(theme.ink)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.55)
+                    .fixedSize(horizontal: false, vertical: true)
                     .accessibilityAddTraits(.isHeader)
                 appearanceBlock
                 directionBlock
@@ -27,6 +30,17 @@ struct SettingsView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .scrollIndicators(.hidden)
+    }
+
+    private var titleDesign: Font.Design {
+        switch direction {
+        case .harbor:
+            .monospaced
+        case .porch:
+            .rounded
+        case .lampblack:
+            .serif
+        }
     }
 
     private var appearanceBlock: some View {
@@ -74,6 +88,9 @@ struct SettingsView: View {
                         Text(choice.title)
                             .font(.title3)
                             .foregroundStyle(theme.ink)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.7)
+                            .fixedSize(horizontal: false, vertical: true)
                         Text(choice.blurb)
                             .font(.subheadline)
                             .foregroundStyle(theme.secondary)

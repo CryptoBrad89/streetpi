@@ -9,6 +9,7 @@ struct HarborHome: View {
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.streetPiStill) private var still
 
     var body: some View {
         ScrollView {
@@ -27,22 +28,32 @@ struct HarborHome: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: Rhythm.line) {
-            HStack(spacing: 8) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Image(systemName: "circle.fill")
                     .font(.system(size: 8))
                     .foregroundStyle(theme.tone(status.tone))
-                    .symbolEffect(.pulse, options: .repeating, isActive: !reduceMotion)
+                    .symbolEffect(.pulse, options: .repeating, isActive: !reduceMotion && !still)
                     .accessibilityHidden(true)
+                    .fixedSize()
+                    .layoutPriority(1)
                 Text(status.linkLine)
                     .font(.subheadline.monospaced())
                     .foregroundStyle(theme.secondary)
-                Spacer(minLength: 0)
+                    .lineLimit(3)
+                    .minimumScaleFactor(0.7)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 ToneMark(tone: status.tone, theme: theme)
+                    .fixedSize()
+                    .layoutPriority(1)
             }
             Text(status.headline)
                 .font(.system(.title, design: .default, weight: .semibold))
                 .foregroundStyle(theme.ink)
+                .lineLimit(5)
+                .minimumScaleFactor(0.55)
                 .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .accessibilityAddTraits(.isHeader)
             if let detail = status.detail {
                 Text(detail)
@@ -97,15 +108,28 @@ struct HarborHome: View {
     private var services: some View {
         VStack(spacing: 0) {
             ForEach(snapshot.services) { service in
-                HStack(alignment: .firstTextBaseline, spacing: Rhythm.line) {
-                    Text(service.name)
-                        .font(.body.weight(.medium))
-                        .foregroundStyle(theme.ink)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    Text(ReadingText.stateWord(for: service))
-                        .font(.body.monospaced())
-                        .foregroundStyle(theme.secondary)
-                        .multilineTextAlignment(.trailing)
+                ViewThatFits(in: .horizontal) {
+                    HStack(alignment: .firstTextBaseline, spacing: Rhythm.line) {
+                        Text(service.name)
+                            .font(.body.weight(.medium))
+                            .foregroundStyle(theme.ink)
+                            .lineLimit(1)
+                        Spacer(minLength: Rhythm.line)
+                        Text(ReadingText.stateWord(for: service))
+                            .font(.body.monospaced())
+                            .foregroundStyle(theme.secondary)
+                            .lineLimit(1)
+                    }
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(service.name)
+                            .font(.body.weight(.medium))
+                            .foregroundStyle(theme.ink)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Text(ReadingText.stateWord(for: service))
+                            .font(.body.monospaced())
+                            .foregroundStyle(theme.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
                 .padding(.vertical, 14)
                 .overlay(alignment: .bottom) {
@@ -115,6 +139,7 @@ struct HarborHome: View {
             }
         }
     }
+
 }
 
 private struct InstrumentCell: View {
@@ -131,6 +156,8 @@ private struct InstrumentCell: View {
             Text(value)
                 .font(.system(.title, design: .monospaced, weight: .medium))
                 .foregroundStyle(theme.ink)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
