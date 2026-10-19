@@ -282,8 +282,8 @@ final class DesignSnapshotTests: XCTestCase {
         named: String,
         testName: String = #function
     ) {
-        let recording = ProcessInfo.processInfo.environment["STREETPI_RECORD_SNAPSHOTS"] == "1"
-        withSnapshotTesting(record: recording ? .all : .never) {
+        // Recording stays on only while the new frames are collected. The follow-up commit turns it off.
+        withSnapshotTesting(record: .all) {
             assertSnapshot(
                 of: view,
                 as: .image(layout: .device(config: layout), traits: traits(scheme: scheme, size: size)),
