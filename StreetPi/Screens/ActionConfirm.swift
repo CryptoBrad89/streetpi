@@ -15,28 +15,26 @@ struct ActionConfirm: View {
         ZStack {
             Color.black.opacity(0.55)
                 .ignoresSafeArea()
-            ViewThatFits(in: .vertical) {
-                card(scrolls: false)
-                    .padding(Rhythm.page)
-                card(scrolls: true)
-                    .padding(Rhythm.page)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            GeometryReader { proxy in
+                ScrollView {
+                    VStack(spacing: 0) {
+                        Spacer(minLength: 0)
+                        card
+                        Spacer(minLength: 0)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: proxy.size.height)
+                }
+                .scrollIndicators(.hidden)
             }
         }
         .accessibilityAddTraits(.isModal)
         .accessibilityElement(children: .contain)
     }
 
-    private func card(scrolls: Bool) -> some View {
+    private var card: some View {
         VStack(alignment: .leading, spacing: Rhythm.block) {
-            if scrolls {
-                ScrollView {
-                    words
-                }
-                .scrollIndicators(.hidden)
-            } else {
-                words
-            }
+            words
             VStack(spacing: Rhythm.line) {
                 confirmButton
                 Button("Cancel", action: onCancel)
@@ -47,12 +45,13 @@ struct ActionConfirm: View {
             }
         }
         .padding(Rhythm.block)
-        .frame(maxWidth: 480, maxHeight: scrolls ? .infinity : nil)
+        .frame(maxWidth: 480)
         .background(theme.surface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 24, style: .continuous)
                 .stroke(theme.hairline, lineWidth: 1)
         }
+        .padding(Rhythm.page)
     }
 
     private var words: some View {
