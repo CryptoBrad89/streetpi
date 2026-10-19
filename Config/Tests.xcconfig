@@ -1,0 +1,9 @@
+#include "Shared.xcconfig"
+
+PRODUCT_NAME = StreetPiTests
+PRODUCT_MODULE_NAME = StreetPiTests
+PRODUCT_BUNDLE_IDENTIFIER = $(STREETPI_BUNDLE_IDENTIFIER).tests
+GENERATE_INFOPLIST_FILE = YES
+TEST_HOST = $(BUILT_PRODUCTS_DIR)/StreetPi.app/StreetPi
+BUNDLE_LOADER = $(TEST_HOST)
+LD_RUNPATH_SEARCH_PATHS = $(inherited) @executable_path/Frameworks @loader_path/Frameworks

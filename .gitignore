@@ -1,0 +1,16 @@
+.build/
+DerivedData/
+*.ipa
+*.xcresult
+xcuserdata/
+*.xcuserstate
+*.xcuserdatad
+.DS_Store
+.swiftpm/
+**/.build/
+Package.resolved
+
+# Reference screenshots and notes. Never commit, never ship.
+streetpi/reference/
+reference/
+**/REFERENCE-ONLY_*
