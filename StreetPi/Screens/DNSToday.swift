@@ -11,11 +11,12 @@ struct DNSToday: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.streetPiStill) private var still
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @State private var minutes = ""
 
     var body: some View {
         DeskScroll(wide: wide) {
             Text("Today")
-                .font(.system(.title, design: .rounded))
+                .font(.system(.largeTitle, design: .rounded))
                 .foregroundStyle(theme.ink)
                 .accessibilityAddTraits(.isHeader)
             HStack(alignment: .firstTextBaseline, spacing: Rhythm.line) {
@@ -35,11 +36,7 @@ struct DNSToday: View {
             }
             .accessibilityElement(children: .combine)
             timers
-            if desk.queryLoggingEnabled, !desk.day.isEmpty {
-                DayChart(samples: desk.day, caption: DNSCopy.chartLiveCaption, theme: theme)
-            } else {
-                EmptyNote(title: DNSCopy.chartEmptyTitle, detail: DNSCopy.chartEmptyDetail, theme: theme)
-            }
+            day
             facts
             Text("Lists updated \(AgePhrase.english(from: desk.listsUpdatedAt, to: now)).")
                 .font(.footnote)
@@ -48,10 +45,13 @@ struct DNSToday: View {
         }
     }
 
-    private var queryCount: String {
-        guard desk.queryLoggingEnabled else { return "Not counted" }
-        let total = desk.day.reduce(0) { $0 + $1.allowed + $1.blocked }
-        return "\(total)"
+    @ViewBuilder
+    private var day: some View {
+        if desk.hasDayLookups {
+            DayChart(samples: desk.day, theme: theme)
+        } else {
+            EmptyNote(title: DNSCopy.emptyChartTitle, detail: DNSCopy.emptyChartDetail, theme: theme)
+        }
     }
 
     private var facts: some View {
@@ -59,7 +59,8 @@ struct DNSToday: View {
             fact("Blocking", desk.blocking.enabled ? "On" : "Paused")
             fact("Devices", "\(desk.knownClients)")
             fact("Block lists", "\(desk.listCount)")
-            fact("Queries today", queryCount)
+            fact("Queries today", "\(desk.queriesToday)")
+            fact("Blocked today", "\(desk.blockedToday)")
         }
         .padding(Rhythm.line)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -114,23 +115,61 @@ struct DNSToday: View {
                     }
                     .scrollIndicators(.hidden)
                 }
+                customPause
             }
         } else {
-            choice("Turn blocking back on") {
+            choice("Turn blocking back on", label: "Turn ad blocking back on") {
                 onAction(.resumeAdBlocking)
             }
         }
     }
 
     private var pauseChoices: some View {
-        ForEach(PauseLength.allCases) { length in
-            choice(length.title) {
+        ForEach(PauseLength.presets) { length in
+            choice(length.title, label: "Pause for \(length.title)") {
                 onAction(.pauseAdBlocking(length))
             }
         }
     }
 
-    private func choice(_ title: String, action: @escaping () -> Void) -> some View {
+    private var customLength: PauseLength? {
+        guard let value = Int(minutes.trimmingCharacters(in: .whitespaces)) else { return nil }
+        return PauseLength(seconds: value * 60)
+    }
+
+    private var customPause: some View {
+        VStack(alignment: .leading, spacing: Rhythm.line) {
+            Text("Custom")
+                .font(.headline)
+                .foregroundStyle(theme.ink)
+            TextField("Minutes", text: $minutes)
+                .keyboardType(.numberPad)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .font(.body)
+                .foregroundStyle(theme.ink)
+            Button {
+                guard let customLength else { return }
+                onAction(.pauseAdBlocking(customLength))
+            } label: {
+                Text("Pause for this long")
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(customLength == nil ? theme.tertiary : theme.ink)
+                    .padding(.horizontal, Rhythm.line)
+                    .padding(.vertical, 10)
+                    .background(theme.surface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .stroke(theme.hairline, lineWidth: 1)
+                    }
+            }
+            .buttonStyle(.plain)
+            .disabled(customLength == nil)
+            .accessibilityLabel("Pause for a custom length")
+        }
+    }
+
+    private func choice(_ title: String, label: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
                 .font(.body.weight(.semibold))
@@ -146,12 +185,12 @@ struct DNSToday: View {
                 }
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(label)
     }
 }
 
 struct DayChart: View {
     var samples: [DayChartSample]
-    var caption: String
     var theme: StreetTheme
 
     var body: some View {
@@ -162,13 +201,9 @@ struct DayChart: View {
                 .accessibilityAddTraits(.isHeader)
             bars
             legend
-            Text(caption)
-                .font(.footnote)
-                .foregroundStyle(theme.secondary)
-                .fixedSize(horizontal: false, vertical: true)
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Sample chart of the last day. \(caption)")
+        .accessibilityLabel("Lookups over the last day. Blocked and allowed.")
     }
 
     private var bars: some View {

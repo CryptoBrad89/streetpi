@@ -4,6 +4,9 @@ name: CI
 # macos-26-xlarge, or any larger runner. Those can bill outside the free plan.
 on:
   pull_request:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 concurrency:

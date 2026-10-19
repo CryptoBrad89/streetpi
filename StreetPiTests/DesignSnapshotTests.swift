@@ -138,28 +138,36 @@ final class DesignSnapshotTests: XCTestCase {
             section: .group(.adBlockerAndDNS),
             screen: .ready(house),
             testName: "dns-confirm",
-            dnsPage: .upkeep,
-            pending: .restartDNS
-        )
-    }
-
-    func testDNSTodayLive() {
-        assertMatrix(
-            section: .group(.adBlockerAndDNS),
-            screen: .ready(house),
-            testName: "dns-today-live",
             dnsPage: .today,
-            desk: .loggingOnFixture
+            pending: .pauseAdBlocking(.fiveMinutes)
         )
     }
 
-    func testDNSLocalWritable() {
+    func testDNSAllow() {
         assertMatrix(
             section: .group(.adBlockerAndDNS),
             screen: .ready(house),
-            testName: "dns-local-writable",
-            dnsPage: .localNames,
-            desk: .loggingOnFixture
+            testName: "dns-allow",
+            dnsPage: .queryLog,
+            pending: .allowDomain(named: "news.example.test")
+        )
+    }
+
+    func testDNSSetup() {
+        assertMatrix(
+            section: .group(.adBlockerAndDNS),
+            screen: .ready(house),
+            testName: "dns-setup",
+            showsSetup: true
+        )
+    }
+
+    func testDNSRefused() {
+        assertMatrix(
+            section: .group(.adBlockerAndDNS),
+            screen: .ready(house),
+            testName: "dns-refused",
+            dnsProblem: .refused
         )
     }
 
@@ -230,7 +238,9 @@ final class DesignSnapshotTests: XCTestCase {
         dnsPage: DNSPage? = nil,
         desk: DNSDesk = .houseFixture,
         machinePage: MachinePage? = nil,
-        pending: HouseholdAction? = nil
+        pending: HouseholdAction? = nil,
+        showsSetup: Bool = false,
+        dnsProblem: PiholeProblem? = nil
     ) {
         for scheme in [ColorScheme.dark, ColorScheme.light] {
             for size in SnapshotScale.allCases {
@@ -245,7 +255,9 @@ final class DesignSnapshotTests: XCTestCase {
                         desk: desk,
                         dnsPage: dnsPage,
                         machinePage: machinePage,
-                        pendingAction: pending
+                        pendingAction: pending,
+                        showsSetup: showsSetup,
+                        dnsProblem: dnsProblem
                     )
                     .environment(\.colorScheme, scheme)
                     .environment(\.dynamicTypeSize, size.dynamicType)

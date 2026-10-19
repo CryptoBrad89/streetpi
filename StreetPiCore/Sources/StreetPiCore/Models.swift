@@ -121,7 +121,7 @@ public struct MachineReading: Sendable, Equatable, Codable {
 
 public struct DNSSummary: Sendable, Equatable, Codable {
     public var blockingEnabled: Bool
-    /// Nil when the filter is not keeping a query log. The screen must stay quiet about counts.
+    /// Nil only when this phone has not loaded a count. FTL still records lookups when the text log is off.
     public var queriesToday: Int?
     public var blockedToday: Int?
 

@@ -64,6 +64,24 @@ struct DeskLink: View {
     }
 }
 
+struct DeskCard<Content: View>: View {
+    var theme: StreetTheme
+    @ViewBuilder var content: () -> Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Rhythm.line) {
+            content()
+        }
+        .padding(Rhythm.line)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(theme.surface, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(theme.hairline, lineWidth: 1)
+        }
+    }
+}
+
 struct EmptyNote: View {
     var title: String
     var detail: String

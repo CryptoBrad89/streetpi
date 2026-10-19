@@ -4,7 +4,7 @@ StreetPi is a native iPhone and iPad app for the Street house. One app, one expe
 
 The screen is drawn from fake fixtures. It does not talk to the Pi, the router, or any other host.
 
-Ad blocker & DNS opens the filter. The house fixture has query logging off and local-name writes locked, so the log, the top lists, and the day chart explain why they are empty. A second fixture turns logging on and allows local names, and those screens fill in. Writes ask in plain English first. The hardest ones ask for Face ID. The app password stays in the Keychain.
+Ad blocker & DNS opens the filter. Today shows blocking and a 24-hour chart of lookups. The only writes are a timed pause, blocking one domain, and allowing one domain. Each one asks in plain English first. Clients, groups, lists, local names, and upkeep are read-only. The text log file can be off; lookups are still kept. The app password and the Pi certificate pin stay in the Keychain. Nothing in this build opens a socket.
 
 Pi health is look-only. It shows meters for the processor, temperature, memory, disk, and uptime, plus a day chart. Services and containers are readings. Alerts stay in the app. Nothing here opens a connection, and the phone does not keep an SSH key or a host pin.
 
@@ -26,4 +26,4 @@ Secrets go in the iOS Keychain (`KeychainSecretStore`). Tests use `MemorySecretS
 
 GitHub Actions runs the core tests on Ubuntu and, on a standard `macos-26` runner, the snapshot matrix plus an unsigned `StreetPi-unsigned.ipa`. Do not move that job to a large or extra-large runner.
 
-Snapshots cover Home, the ad blocker pages in both logging states, the machine pages, alerts, Settings, and the intro, in dark and light, default and largest Dynamic Type, on a small iPhone, a large iPhone, and an iPad.
+Snapshots cover Home, the ad blocker pages, the machine pages, alerts, Settings, and the intro, in dark and light, default and largest Dynamic Type, on a small iPhone, a large iPhone, and an iPad.

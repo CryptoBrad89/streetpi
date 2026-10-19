@@ -1,22 +1,40 @@
 import SwiftUI
 import StreetPiCore
 
-struct ManageScreen: View {
+struct ReadOnlyRows: View {
     var title: String
     var intro: String
     var rows: [NamedRow]
     var notice: String?
-    var addWord: String
-    var canWrite: Bool = true
     var theme: StreetTheme
     var wide: Bool
-    var onAdd: (String) -> Void
-    var onRemove: (String) -> Void
-
-    @State private var draft = ""
 
     var body: some View {
         DeskScroll(wide: wide) {
+            heading
+            if let notice {
+                Text(notice)
+                    .font(.subheadline)
+                    .foregroundStyle(theme.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            ForEach(rows) { row in
+                DeskCard(theme: theme) {
+                    Text(row.name)
+                        .font(.headline)
+                        .foregroundStyle(theme.ink)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text(row.detail)
+                        .font(.subheadline)
+                        .foregroundStyle(theme.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+    }
+
+    private var heading: some View {
+        VStack(alignment: .leading, spacing: Rhythm.tight) {
             Text(title)
                 .font(.system(.largeTitle, design: .rounded))
                 .foregroundStyle(theme.ink)
@@ -27,87 +45,149 @@ struct ManageScreen: View {
                 .font(.body)
                 .foregroundStyle(theme.secondary)
                 .fixedSize(horizontal: false, vertical: true)
-            if let notice {
-                Text(notice)
-                    .font(.subheadline)
-                    .foregroundStyle(theme.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            ForEach(rows) { row in
-                rowView(row)
-            }
-            if canWrite {
-                addField
-            }
         }
     }
+}
 
-    private func rowView(_ row: NamedRow) -> some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(alignment: .firstTextBaseline, spacing: Rhythm.line) {
-                labels(row)
-                if canWrite { remove(row.name) }
-            }
-            VStack(alignment: .leading, spacing: Rhythm.tight) {
-                labels(row)
-                if canWrite { remove(row.name) }
-            }
-        }
-        .padding(Rhythm.line)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(theme.surface, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(theme.hairline, lineWidth: 1)
-        }
-    }
+struct DomainScreen: View {
+    var domains: [NamedRow]
+    var theme: StreetTheme
+    var wide: Bool
+    var onAction: (HouseholdAction) -> Void
 
-    private func labels(_ row: NamedRow) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(row.name)
-                .font(.headline)
+    @State private var draft = ""
+
+    var body: some View {
+        DeskScroll(wide: wide) {
+            Text("Domains")
+                .font(.system(.largeTitle, design: .rounded))
                 .foregroundStyle(theme.ink)
-                .fixedSize(horizontal: false, vertical: true)
-            Text(row.detail)
-                .font(.subheadline)
+                .accessibilityAddTraits(.isHeader)
+            Text("Block one name, or allow one name, for the whole house.")
+                .font(.body)
                 .foregroundStyle(theme.secondary)
                 .fixedSize(horizontal: false, vertical: true)
+            ForEach(domains) { row in
+                DeskCard(theme: theme) {
+                    Text(row.name)
+                        .font(.headline)
+                        .foregroundStyle(theme.ink)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text(row.detail)
+                        .font(.subheadline)
+                        .foregroundStyle(theme.secondary)
+                }
+            }
+            editor
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private func remove(_ name: String) -> some View {
-        Button("Remove") {
-            onRemove(name)
-        }
-        .font(.body.weight(.semibold))
-        .foregroundStyle(theme.problem)
-        .accessibilityLabel("Remove \(name)")
+    private var trimmed: String {
+        draft.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    private var addField: some View {
-        VStack(alignment: .leading, spacing: Rhythm.line) {
-            TextField(addWord, text: $draft)
+    private var editor: some View {
+        DeskCard(theme: theme) {
+            TextField("A domain name", text: $draft)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
                 .font(.body)
                 .foregroundStyle(theme.ink)
-            Button("Add") {
-                let name = draft.trimmingCharacters(in: .whitespacesAndNewlines)
-                guard !name.isEmpty else { return }
-                onAdd(name)
-                draft = ""
+            Button("Block") {
+                submit(blocked: true)
             }
             .font(.body.weight(.semibold))
-            .foregroundStyle(theme.accent)
-            .disabled(draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            .foregroundStyle(trimmed.isEmpty ? theme.tertiary : theme.accent)
+            .disabled(trimmed.isEmpty)
+            Button("Allow") {
+                submit(blocked: false)
+            }
+            .font(.body.weight(.semibold))
+            .foregroundStyle(trimmed.isEmpty ? theme.tertiary : theme.accent)
+            .disabled(trimmed.isEmpty)
         }
-        .padding(Rhythm.line)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(theme.surface, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(theme.hairline, lineWidth: 1)
+    }
+
+    private func submit(blocked: Bool) {
+        let name = trimmed
+        guard !name.isEmpty else { return }
+        draft = ""
+        if blocked {
+            onAction(.blockDomain(named: name))
+        } else {
+            onAction(.allowDomain(named: name))
+        }
+    }
+}
+
+struct LocalNamesScreen: View {
+    var hosts: [NamedRow]
+    var cnames: [NamedRow]
+    var theme: StreetTheme
+    var wide: Bool
+
+    var body: some View {
+        DeskScroll(wide: wide) {
+            Text("Local names")
+                .font(.system(.largeTitle, design: .rounded))
+                .foregroundStyle(theme.ink)
+                .accessibilityAddTraits(.isHeader)
+            Text(DNSCopy.localNamesNote)
+                .font(.body)
+                .foregroundStyle(theme.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            section("Addresses", rows: hosts)
+            section("Other names", rows: cnames)
+        }
+    }
+
+    private func section(_ title: String, rows: [NamedRow]) -> some View {
+        VStack(alignment: .leading, spacing: Rhythm.line) {
+            Text(title)
+                .font(.headline)
+                .foregroundStyle(theme.ink)
+                .accessibilityAddTraits(.isHeader)
+            ForEach(rows) { row in
+                DeskCard(theme: theme) {
+                    Text(row.name)
+                        .font(.headline)
+                        .foregroundStyle(theme.ink)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text(row.detail)
+                        .font(.subheadline)
+                        .foregroundStyle(theme.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+    }
+}
+
+struct ListScreen: View {
+    var lists: [DNSListRow]
+    var theme: StreetTheme
+    var wide: Bool
+
+    var body: some View {
+        DeskScroll(wide: wide) {
+            Text("Block lists")
+                .font(.system(.largeTitle, design: .rounded))
+                .foregroundStyle(theme.ink)
+                .accessibilityAddTraits(.isHeader)
+            Text("Lists the filter uses. This phone does not add, remove, or turn them off.")
+                .font(.body)
+                .foregroundStyle(theme.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            ForEach(lists) { list in
+                DeskCard(theme: theme) {
+                    Text(list.name)
+                        .font(.headline)
+                        .foregroundStyle(theme.ink)
+                    Text("\(list.host) · \(list.statusWord)")
+                        .font(.subheadline)
+                        .foregroundStyle(theme.secondary)
+                }
+            }
         }
     }
 }
@@ -117,7 +197,6 @@ struct DNSUpkeep: View {
     var theme: StreetTheme
     var wide: Bool
     var now: Date
-    var onAction: (HouseholdAction) -> Void
 
     var body: some View {
         DeskScroll(wide: wide) {
@@ -128,31 +207,23 @@ struct DNSUpkeep: View {
             Text("Lists updated \(AgePhrase.english(from: desk.listsUpdatedAt, to: now)).")
                 .font(.body)
                 .foregroundStyle(theme.secondary)
-            Text(DNSCopy.queryLogDetail)
-                .font(.subheadline)
-                .foregroundStyle(theme.tertiary)
                 .fixedSize(horizontal: false, vertical: true)
-            action("Update the block lists") { onAction(.updateBlockLists) }
-            action("Restart DNS") { onAction(.restartDNS) }
-            action("Clear the query log") { onAction(.flushQueryLog) }
-        }
-    }
-
-    private func action(_ title: String, perform: @escaping () -> Void) -> some View {
-        Button(action: perform) {
-            Text(title)
-                .font(.body.weight(.semibold))
-                .foregroundStyle(theme.ink)
-                .multilineTextAlignment(.leading)
+            Text(DNSCopy.upkeepDetail)
+                .font(.body)
+                .foregroundStyle(theme.secondary)
                 .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(Rhythm.line)
-                .background(theme.surface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(theme.hairline, lineWidth: 1)
-                }
+            DeskCard(theme: theme) {
+                Text("Text log file")
+                    .font(.headline)
+                    .foregroundStyle(theme.ink)
+                Text(desk.textLogFileEnabled ? "On" : "Off")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(theme.ink)
+                Text("Lookups are still kept.")
+                    .font(.subheadline)
+                    .foregroundStyle(theme.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
-        .buttonStyle(.plain)
     }
 }

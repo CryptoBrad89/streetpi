@@ -1,7 +1,9 @@
 {
   "capturedAt": "2026-10-19T15:00:00Z",
   "dns": {
-    "blockingEnabled": true
+    "blockedToday": 405,
+    "blockingEnabled": true,
+    "queriesToday": 2049
   },
   "link": {
     "kind": "homeNetwork"

@@ -33,17 +33,17 @@ public enum DNSPage: String, CaseIterable, Sendable, Equatable, Identifiable, Co
 
     public var blurb: String {
         switch self {
-        case .today: "Blocking, and a picture of the last day."
+        case .today: "Blocking, and the last day of lookups."
         case .statistics: "The busiest names and devices."
-        case .queryLog: "Lookups the Pi has saved."
+        case .queryLog: "Lookups the Pi has kept."
         case .liveLog: "Lookups as they happen."
-        case .services: "Sites the house can refuse as a group."
+        case .services: "Kinds of sites the house refuses."
         case .clients: "Devices the house knows."
         case .groups: "Devices that share a rule."
         case .domains: "Names to block or allow."
-        case .lists: "Lists the filter downloads."
+        case .lists: "Lists the filter uses."
         case .localNames: "Names that stay inside the house."
-        case .upkeep: "Update lists, restart, or clear the log."
+        case .upkeep: "What the filter is doing. Nothing here changes the Pi."
         }
     }
 
