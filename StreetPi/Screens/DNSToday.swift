@@ -156,7 +156,7 @@ struct DNSToday: View {
                     .font(.body.weight(.semibold))
                     .foregroundStyle(customLength == nil ? theme.tertiary : theme.ink)
                     .padding(.horizontal, Rhythm.line)
-                    .padding(.vertical, 10)
+                    .frame(minHeight: 44, alignment: .leading)
                     .background(theme.surface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .overlay {
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -174,10 +174,10 @@ struct DNSToday: View {
             Text(title)
                 .font(.body.weight(.semibold))
                 .foregroundStyle(theme.ink)
-                .lineLimit(2)
-                .minimumScaleFactor(0.7)
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
                 .padding(.horizontal, Rhythm.line)
-                .padding(.vertical, 10)
+                .frame(minHeight: 44, alignment: .leading)
                 .background(theme.surface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .overlay {
                     RoundedRectangle(cornerRadius: 16, style: .continuous)

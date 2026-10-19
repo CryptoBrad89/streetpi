@@ -27,6 +27,12 @@ struct AppShell: View {
 
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.streetPiStill) private var still
+
+    private var calm: Animation? {
+        (reduceMotion || still) ? nil : .easeInOut(duration: 0.28)
+    }
 
     private var theme: StreetTheme {
         .house(colorScheme)
@@ -45,7 +51,7 @@ struct AppShell: View {
         ZStack {
             theme.background.ignoresSafeArea()
             GeometryReader { proxy in
-                shell(wide: proxy.size.width >= 760)
+                shell(wide: proxy.size.width >= 700)
                     .frame(width: proxy.size.width, height: proxy.size.height, alignment: .topLeading)
             }
             if let pendingAction {
@@ -63,21 +69,26 @@ struct AppShell: View {
     private func shell(wide: Bool) -> some View {
         Group {
             if wide {
-                HStack(spacing: 0) {
+                NavigationSplitView {
                     sidebar
-                        .frame(width: 248)
-                        .background(theme.surface)
-                    Rectangle()
-                        .fill(theme.hairline)
-                        .frame(width: 1)
-                        .accessibilityHidden(true)
+                        .navigationSplitViewColumnWidth(
+                            min: dynamicTypeSize.isAccessibilitySize ? 280 : 216,
+                            ideal: dynamicTypeSize.isAccessibilitySize ? 360 : 260,
+                            max: 460
+                        )
+                        .toolbar(.hidden, for: .navigationBar)
+                } detail: {
                     detail(wide: true)
+                        .toolbar(.hidden, for: .navigationBar)
                 }
+                .navigationSplitViewStyle(.balanced)
+                .environment(\.horizontalSizeClass, .regular)
             } else {
                 VStack(spacing: 0) {
                     phoneChrome
                     detail(wide: false)
                 }
+                .environment(\.horizontalSizeClass, .compact)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -90,8 +101,7 @@ struct AppShell: View {
                 Text("StreetPi")
                     .font(.system(.title3, design: .rounded))
                     .foregroundStyle(theme.ink)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.6)
+                    .fixedSize(horizontal: false, vertical: true)
                     .padding(.bottom, Rhythm.line)
                     .accessibilityAddTraits(.isHeader)
                 sidebarButton("Home", section: .home)
@@ -105,6 +115,9 @@ struct AppShell: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .scrollIndicators(.hidden)
+        .background(theme.surface)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Sections")
     }
 
     private func sidebarButton(_ title: String, section target: AppSection) -> some View {
@@ -115,10 +128,9 @@ struct AppShell: View {
         .font(.body.weight(selected ? .semibold : .regular))
         .foregroundStyle(selected ? theme.ink : theme.secondary)
         .multilineTextAlignment(.leading)
-        .lineLimit(2)
-        .minimumScaleFactor(0.7)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.vertical, 10)
+        .fixedSize(horizontal: false, vertical: true)
+        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+        .padding(.vertical, 8)
         .padding(.horizontal, 12)
         .background(
             selected ? theme.background : Color.clear,
@@ -130,12 +142,9 @@ struct AppShell: View {
 
     private var phoneChrome: some View {
         let title = Text(chromeTitle)
-            .font(.caption)
-            .foregroundStyle(theme.tertiary)
-            .textCase(.uppercase)
-            .tracking(dynamicTypeSize.isAccessibilitySize ? 0 : 1.2)
-            .lineLimit(1)
-            .minimumScaleFactor(0.5)
+            .font(.subheadline)
+            .foregroundStyle(theme.secondary)
+            .fixedSize(horizontal: false, vertical: true)
         return Group {
             if dynamicTypeSize.isAccessibilitySize {
                 VStack(alignment: .leading, spacing: Rhythm.tight) {
@@ -189,14 +198,14 @@ struct AppShell: View {
                 onSection(.home)
             }
         case .home:
-            HStack(spacing: 8) {
-                IconChromeButton(title: "Alerts", systemImage: "bell") {
+            ChromeButtonPair(
+                first: IconChromeButton(title: "Alerts", systemImage: "bell") {
                     onSection(.alerts)
-                }
-                IconChromeButton(title: "Settings", systemImage: "gearshape") {
+                },
+                second: IconChromeButton(title: "Settings", systemImage: "gearshape") {
                     onSection(.settings)
                 }
-            }
+            )
         }
     }
 
@@ -217,8 +226,20 @@ struct AppShell: View {
         }
     }
 
+    private var splitsDesk: Bool {
+        !dynamicTypeSize.isAccessibilitySize
+    }
+
     @ViewBuilder
     private func detail(wide: Bool) -> some View {
+        detailBody(wide: wide)
+            .animation(calm, value: section)
+            .animation(calm, value: dnsPage)
+            .animation(calm, value: machinePage)
+    }
+
+    @ViewBuilder
+    private func detailBody(wide: Bool) -> some View {
         switch section {
         case .home:
             HomeView(
@@ -235,9 +256,33 @@ struct AppShell: View {
             AlertsScreen(alerts: machine.alerts, theme: theme, wide: wide)
         case .group(let group):
             if group == .adBlockerAndDNS {
-                dnsDetail(wide: wide)
+                DNSDeskDetail(
+                    wide: wide,
+                    splits: splitsDesk,
+                    desk: desk,
+                    page: dnsPage,
+                    theme: theme,
+                    now: now,
+                    passwordSaved: passwordSaved,
+                    sessionActive: sessionActive,
+                    showsSetup: showsSetup,
+                    problem: dnsProblem,
+                    onPage: onDNSPage,
+                    onPending: onPending,
+                    onSavePassword: onSavePassword,
+                    onSetupSave: onSetupSave,
+                    onSetupCancel: onSetupCancel
+                )
             } else if group == .piHealth {
-                machineDetail(wide: wide)
+                MachineDeskDetail(
+                    wide: wide,
+                    splits: splitsDesk,
+                    desk: machine,
+                    page: machinePage,
+                    machine: screen.snapshot?.machine,
+                    theme: theme,
+                    onPage: onMachinePage
+                )
             } else if let brief = groups.first(where: { $0.id == group }) {
                 GroupDashboard(
                     theme: theme,
@@ -264,80 +309,6 @@ struct AppShell: View {
             }
         case .settings:
             SettingsView(theme: theme, appearance: appearance, onAppearance: onAppearance)
-        }
-    }
-
-    @ViewBuilder
-    private func dnsDetail(wide: Bool) -> some View {
-        if showsSetup {
-            PiholeSetupView(
-                theme: theme,
-                wide: wide,
-                onSave: onSetupSave,
-                onCancel: onSetupCancel
-            )
-        } else if let dnsProblem {
-            DNSProblemView(problem: dnsProblem, theme: theme, wide: wide)
-        } else if let dnsPage {
-            VStack(alignment: .leading, spacing: 0) {
-                if wide {
-                    WideBack(title: "Ad blocker & DNS", theme: theme) {
-                        onDNSPage(nil)
-                    }
-                    .padding(.horizontal, Rhythm.page)
-                    .padding(.top, Rhythm.line)
-                }
-                DNSPageBody(
-                    page: dnsPage,
-                    desk: desk,
-                    theme: theme,
-                    wide: wide,
-                    now: now,
-                    onAction: { onPending($0) }
-                )
-            }
-        } else {
-            DNSHub(
-                desk: desk,
-                theme: theme,
-                wide: wide,
-                passwordSaved: passwordSaved,
-                sessionActive: sessionActive,
-                onPage: { onDNSPage($0) },
-                onSavePassword: onSavePassword,
-                onSignOut: { onPending(.signOutOfAdBlocker) }
-            )
-        }
-    }
-
-    @ViewBuilder
-    private func machineDetail(wide: Bool) -> some View {
-        if let machinePage {
-            VStack(alignment: .leading, spacing: 0) {
-                if wide {
-                    WideBack(title: "Pi health", theme: theme) {
-                        onMachinePage(nil)
-                    }
-                    .padding(.horizontal, Rhythm.page)
-                    .padding(.top, Rhythm.line)
-                }
-                MachinePageBody(
-                    page: machinePage,
-                    desk: machine,
-                    machine: screen.snapshot?.machine,
-                    theme: theme,
-                    wide: wide,
-                    onPage: { onMachinePage($0) }
-                )
-            }
-        } else if let reading = screen.snapshot?.machine {
-            MachineHome(
-                desk: machine,
-                machine: reading,
-                theme: theme,
-                wide: wide,
-                onPage: { onMachinePage($0) }
-            )
         }
     }
 

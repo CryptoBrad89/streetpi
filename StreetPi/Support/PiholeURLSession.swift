@@ -4,6 +4,7 @@ import Security
 import StreetPiCore
 
 /// Live transport for the house Pi. Sockets stay off, so `send` never dials.
+/// `URLSession` uses its own background queue (`delegateQueue: nil`), not the main thread.
 struct PiholeURLSessionTransport: PiholeTransport {
     var pinnedFingerprint: String?
 

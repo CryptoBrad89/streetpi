@@ -119,5 +119,6 @@ struct WideBack: View {
             .font(.body)
             .foregroundStyle(theme.accent)
             .labelStyle(.titleAndIcon)
+            .frame(minHeight: 44, alignment: .leading)
     }
 }

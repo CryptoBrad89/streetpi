@@ -50,7 +50,7 @@ extension StreetTheme {
                 surface: StreetColor.rgb(0xFFF8F0),
                 ink: StreetColor.rgb(0x2A221C),
                 secondary: StreetColor.rgb(0x6A5B4E),
-                tertiary: StreetColor.rgb(0x948678),
+                tertiary: StreetColor.rgb(0x5C5146),
                 accent: StreetColor.rgb(0xA24E28),
                 calm: StreetColor.rgb(0x3E6B40),
                 attention: StreetColor.rgb(0x8A4E12),

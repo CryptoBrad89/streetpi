@@ -2,7 +2,7 @@
 
 StreetPi is a native iPhone and iPad app for the Street house. One app, one experience. It says what the house is doing in plain English.
 
-The screen is drawn from fake fixtures. It does not talk to the Pi, the router, or any other host.
+The screen is drawn from fake fixtures. It does not talk to the Pi, the router, or any other host. Version 1.0.0 is the first sideload. See `RELEASE-NOTES.md`.
 
 Ad blocker & DNS opens the filter. Today shows blocking and a 24-hour chart of lookups. The only writes are a timed pause, blocking one domain, and allowing one domain. Each one asks in plain English first. Clients, groups, lists, local names, and upkeep are read-only. The text log file can be off; lookups are still kept. The app password and the Pi certificate pin stay in the Keychain. Nothing in this build opens a socket.
 

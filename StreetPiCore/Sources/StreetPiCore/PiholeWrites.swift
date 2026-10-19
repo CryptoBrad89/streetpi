@@ -39,7 +39,7 @@ public enum PiholeProblem: Error, Sendable, Equatable {
         case .refused:
             "The Pi will not do that from this phone. Nothing was changed."
         case .offline:
-            "Nothing was changed. Try again when this phone can see the Pi."
+            "This phone can't see the Pi right now. Nothing was changed. StreetPi will try again on its own."
         case .needsPassword:
             "Enter the app password once. It stays on this phone."
         case .needsSignIn:

@@ -11,15 +11,17 @@ struct SettingsView: View {
                 Text("Settings")
                     .font(.system(.largeTitle, design: .rounded))
                     .foregroundStyle(theme.ink)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.55)
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityAddTraits(.isHeader)
                 appearanceBlock
                 Text("StreetPi is the same app for everyone in the house. Nothing here is tied to a person.")
-                    .font(.footnote)
-                    .foregroundStyle(theme.tertiary)
+                    .font(.body)
+                    .foregroundStyle(theme.secondary)
                     .fixedSize(horizontal: false, vertical: true)
+                Text(versionLine)
+                    .font(.subheadline)
+                    .foregroundStyle(theme.secondary)
+                    .accessibilityLabel(versionLine)
             }
             .padding(.horizontal, Rhythm.page)
             .padding(.bottom, Rhythm.page)
@@ -43,6 +45,13 @@ struct SettingsView: View {
                 }
             }
         }
+    }
+
+    private var versionLine: String {
+        let short = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
+        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? ""
+        guard !short.isEmpty, !build.isEmpty else { return "StreetPi" }
+        return "Version \(short) (\(build))"
     }
 
     private var appearanceButtons: some View {
@@ -69,7 +78,7 @@ private struct ChoiceButton: View {
             .font(.body.weight(.medium))
             .foregroundStyle(selected ? theme.background : theme.ink)
             .padding(.horizontal, 16)
-            .padding(.vertical, 10)
+            .frame(minHeight: 44)
             .background(selected ? theme.ink : theme.surface, in: Capsule())
             .overlay {
                 Capsule().stroke(theme.hairline, lineWidth: selected ? 0 : 1)
