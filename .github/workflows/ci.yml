@@ -66,6 +66,8 @@ jobs:
           xcode-select -p
 
       - name: Snapshot tests
+        env:
+          SNAPSHOT_TESTING_RECORD: failed
         run: |
           set -euo pipefail
           DEST="$(bash scripts/pick-simulator.sh)"
