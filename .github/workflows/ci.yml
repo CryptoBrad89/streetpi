@@ -66,8 +66,6 @@ jobs:
           xcode-select -p
 
       - name: Snapshot tests
-        env:
-          SIMCTL_CHILD_SNAPSHOT_TESTING_RECORD: failed
         run: |
           set -euo pipefail
           DEST="$(bash scripts/pick-simulator.sh)"
@@ -79,21 +77,6 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY=""
-
-      - name: Keep the snapshots that failed
-        if: always()
-        run: |
-          set -euo pipefail
-          copied=0
-          while IFS= read -r png; do
-            base="$(basename "$png")"
-            dest="StreetPiTests/__Snapshots__/DesignSnapshotTests/${base}"
-            if [[ -f "$dest" ]]; then
-              cp "$png" "$dest"
-              copied=$((copied + 1))
-            fi
-          done < <(find "$HOME/Library/Developer/CoreSimulator" -path '*/tmp/DesignSnapshotTests/*.png' -print)
-          echo "Copied ${copied} failed snapshots into the reference folder."
 
       - name: Upload design snapshots
         if: always()
