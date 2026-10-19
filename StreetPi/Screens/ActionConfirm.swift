@@ -17,9 +17,11 @@ struct ActionConfirm: View {
                 .ignoresSafeArea()
             ViewThatFits(in: .vertical) {
                 card(scrolls: false)
+                    .padding(Rhythm.page)
                 card(scrolls: true)
+                    .padding(Rhythm.page)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .padding(Rhythm.page)
         }
         .accessibilityAddTraits(.isModal)
         .accessibilityElement(children: .contain)
@@ -45,7 +47,7 @@ struct ActionConfirm: View {
             }
         }
         .padding(Rhythm.block)
-        .frame(maxWidth: 480)
+        .frame(maxWidth: 480, maxHeight: scrolls ? .infinity : nil)
         .background(theme.surface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 24, style: .continuous)
