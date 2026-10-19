@@ -41,7 +41,11 @@ extension HouseholdSnapshot {
             diskUsedFraction: 0.22,
             uptimeSeconds: 1_036_800
         ),
-        dns: DNSSummary(blockingEnabled: true)
+        dns: DNSSummary(
+            blockingEnabled: true,
+            queriesToday: DNSDesk.houseFixture.queriesToday,
+            blockedToday: DNSDesk.houseFixture.blockedToday
+        )
     )
 
     public static let awayTroubleFixture = HouseholdSnapshot(

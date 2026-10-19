@@ -10,8 +10,10 @@ struct RootView: View {
     @State private var dnsPage: DNSPage?
     @State private var pending: HouseholdAction?
     @State private var passwordSaved = false
-    @State private var showPassword = false
+    @State private var showsSetup = false
+    @State private var dnsSession = DNSSessionHold()
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.scenePhase) private var scenePhase
     @Environment(\.secretStore) private var secretStore
     @AppStorage(PreferenceKey.appearance) private var appearanceRaw = AppearancePreference.system.rawValue
 
@@ -37,12 +39,16 @@ struct RootView: View {
                 dnsPage: dnsPage,
                 pendingAction: pending,
                 passwordSaved: passwordSaved,
+                showsSetup: showsSetup,
+                sessionActive: dnsSession.client != nil,
                 onDNSPage: { dnsPage = $0 },
                 onPending: { pending = $0 },
                 onConfirm: { action in
                     Task { await confirm(action) }
                 },
-                onSavePassword: { showPassword = true }
+                onSavePassword: { showsSetup = true },
+                onSetupSave: saveSetup,
+                onSetupCancel: { showsSetup = false }
             )
             if showIntro {
                 IntroView(theme: .house(colorScheme), animatesIn: true) {
@@ -53,12 +59,12 @@ struct RootView: View {
         }
         .preferredColorScheme(appearance.colorScheme)
         .environment(\.secretStore, KeychainSecretStore())
-        .sheet(isPresented: $showPassword) {
-            SavePasswordSheet(
-                theme: .house(colorScheme),
-                onSave: savePassword,
-                onCancel: { showPassword = false }
-            )
+        .onChange(of: scenePhase) { _, phase in
+            guard phase == .background else { return }
+            let client = dnsSession.client
+            Task {
+                await client?.appDidEnterBackground()
+            }
         }
         .task {
             let clock = now
@@ -71,11 +77,17 @@ struct RootView: View {
         }
     }
 
-    private func savePassword(_ raw: String) {
+    private func saveSetup(_ raw: String) {
         guard !raw.isEmpty else { return }
-        try? secretStore.save(Data(raw.utf8), for: AppPassword.account)
-        passwordSaved = true
-        showPassword = false
+        do {
+            try secretStore.save(Data(raw.utf8), for: AppPassword.account)
+            let pin = Data(PiholeCertificate.houseFixture.sha256Fingerprint.utf8)
+            try secretStore.save(pin, for: AppPassword.certificatePin)
+            passwordSaved = true
+            showsSetup = false
+        } catch {
+            showsSetup = true
+        }
     }
 
     private func confirm(_ action: HouseholdAction) async {
@@ -85,7 +97,11 @@ struct RootView: View {
             let allowed = await FaceIDGate.allow(reason: reason)
             guard allowed else { return }
         }
-        desk = desk.applying(action)
+        if case .signOutOfAdBlocker = action {
+            await dnsSession.client?.signOut()
+        } else {
+            desk = desk.applying(action)
+        }
         pending = nil
     }
 }

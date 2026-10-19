@@ -2,6 +2,7 @@ import SwiftUI
 import StreetPiCore
 
 struct DNSStatistics: View {
+    var desk: DNSDesk
     var theme: StreetTheme
     var wide: Bool
 
@@ -11,27 +12,47 @@ struct DNSStatistics: View {
                 .font(.system(.largeTitle, design: .rounded))
                 .foregroundStyle(theme.ink)
                 .accessibilityAddTraits(.isHeader)
-            EmptyNote(title: DNSCopy.topListsTitle, detail: DNSCopy.topListsDetail, theme: theme)
-            heading("Busiest devices")
-            heading("Busiest names")
-            heading("Most often blocked")
+            if desk.topClients.isEmpty && desk.topDomains.isEmpty && desk.blockedDomains.isEmpty {
+                EmptyNote(title: DNSCopy.emptyTopsTitle, detail: DNSCopy.emptyTopsDetail, theme: theme)
+            } else {
+                countSection("Busiest devices", rows: desk.topClients)
+                countSection("Busiest names", rows: desk.topDomains)
+                countSection("Most often blocked", rows: desk.blockedDomains)
+            }
         }
     }
 
-    private func heading(_ title: String) -> some View {
-        Text(title)
-            .font(.headline)
-            .foregroundStyle(theme.secondary)
-            .accessibilityAddTraits(.isHeader)
+    private func countSection(_ title: String, rows: [DNSCount]) -> some View {
+        VStack(alignment: .leading, spacing: Rhythm.line) {
+            Text(title)
+                .font(.headline)
+                .foregroundStyle(theme.ink)
+                .accessibilityAddTraits(.isHeader)
+            ForEach(rows) { row in
+                DeskCard(theme: theme) {
+                    Text(row.name)
+                        .font(.headline)
+                        .foregroundStyle(theme.ink)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text("\(row.count)")
+                        .font(.subheadline)
+                        .foregroundStyle(theme.secondary)
+                }
+            }
+        }
     }
 }
 
 struct DNSLogScreen: View {
     var title: String
+    var queries: [DNSQuery]
     var emptyTitle: String
     var emptyDetail: String
+    var offersAllow: Bool
     var theme: StreetTheme
     var wide: Bool
+    var now: Date
+    var onAllow: (String) -> Void
 
     var body: some View {
         DeskScroll(wide: wide) {
@@ -41,7 +62,34 @@ struct DNSLogScreen: View {
                 .lineLimit(2)
                 .minimumScaleFactor(0.6)
                 .accessibilityAddTraits(.isHeader)
-            EmptyNote(title: emptyTitle, detail: emptyDetail, theme: theme)
+            if queries.isEmpty {
+                EmptyNote(title: emptyTitle, detail: emptyDetail, theme: theme)
+            } else {
+                ForEach(queries) { query in
+                    queryRow(query)
+                }
+            }
+        }
+    }
+
+    private func queryRow(_ query: DNSQuery) -> some View {
+        DeskCard(theme: theme) {
+            Text(query.domain)
+                .font(.headline)
+                .foregroundStyle(theme.ink)
+                .fixedSize(horizontal: false, vertical: true)
+            Text("\(query.client) · \(AgePhrase.english(from: query.at, to: now)) · \(query.outcome.word)")
+                .font(.subheadline)
+                .foregroundStyle(theme.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            if offersAllow {
+                Button("Allow") {
+                    onAllow(query.domain)
+                }
+                .font(.body.weight(.semibold))
+                .foregroundStyle(theme.accent)
+                .accessibilityLabel("Allow \(query.domain)")
+            }
         }
     }
 }
@@ -50,7 +98,6 @@ struct DNSServices: View {
     var services: [DNSServiceChoice]
     var theme: StreetTheme
     var wide: Bool
-    var onAction: (HouseholdAction) -> Void
 
     var body: some View {
         DeskScroll(wide: wide) {
@@ -58,12 +105,12 @@ struct DNSServices: View {
                 .font(.system(.largeTitle, design: .rounded))
                 .foregroundStyle(theme.ink)
                 .accessibilityAddTraits(.isHeader)
-            Text("Turn a whole kind of site off for the house.")
+            Text("Kinds of sites the house refuses. This phone does not change them.")
                 .font(.body)
                 .foregroundStyle(theme.secondary)
                 .fixedSize(horizontal: false, vertical: true)
             ForEach(services) { service in
-                VStack(alignment: .leading, spacing: Rhythm.tight) {
+                DeskCard(theme: theme) {
                     Text(service.name)
                         .font(.headline)
                         .foregroundStyle(theme.ink)
@@ -74,18 +121,6 @@ struct DNSServices: View {
                     Text(service.blocked ? "Blocked" : "Allowed")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(theme.ink)
-                    Button(service.blocked ? "Allow it" : "Block it") {
-                        onAction(.setServiceBlocked(named: service.name, blocked: !service.blocked))
-                    }
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(theme.accent)
-                }
-                .padding(Rhythm.line)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(theme.surface, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .stroke(theme.hairline, lineWidth: 1)
                 }
             }
         }

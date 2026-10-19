@@ -133,8 +133,16 @@ final class StatusNarratorTests: XCTestCase {
         )
     }
 
-    func testMissingQueryCountsStayNil() {
-        XCTAssertNil(HouseholdSnapshot.healthyFixture.dns?.queriesToday)
-        XCTAssertNil(HouseholdSnapshot.healthyFixture.dns?.blockedToday)
+    func testHouseCountsAreKeptWhenTheTextLogIsOff() {
+        XCTAssertEqual(
+            HouseholdSnapshot.healthyFixture.dns?.queriesToday,
+            DNSDesk.houseFixture.queriesToday
+        )
+        XCTAssertEqual(
+            HouseholdSnapshot.healthyFixture.dns?.blockedToday,
+            DNSDesk.houseFixture.blockedToday
+        )
+        XCTAssertFalse(DNSDesk.houseFixture.textLogFileEnabled)
+        XCTAssertNil(HouseholdSnapshot.emptyFixture.dns?.queriesToday)
     }
 }

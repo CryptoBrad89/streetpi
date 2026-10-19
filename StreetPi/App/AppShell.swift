@@ -12,10 +12,15 @@ struct AppShell: View {
     var dnsPage: DNSPage?
     var pendingAction: HouseholdAction?
     var passwordSaved: Bool = true
+    var showsSetup: Bool = false
+    var dnsProblem: PiholeProblem?
+    var sessionActive: Bool = false
     var onDNSPage: (DNSPage?) -> Void = { _ in }
     var onPending: (HouseholdAction?) -> Void = { _ in }
     var onConfirm: (HouseholdAction) -> Void = { _ in }
     var onSavePassword: () -> Void = {}
+    var onSetupSave: (String) -> Void = { _ in }
+    var onSetupCancel: () -> Void = {}
 
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -232,7 +237,16 @@ struct AppShell: View {
 
     @ViewBuilder
     private func dnsDetail(wide: Bool) -> some View {
-        if let dnsPage {
+        if showsSetup {
+            PiholeSetupView(
+                theme: theme,
+                wide: wide,
+                onSave: onSetupSave,
+                onCancel: onSetupCancel
+            )
+        } else if let dnsProblem {
+            DNSProblemView(problem: dnsProblem, theme: theme, wide: wide)
+        } else if let dnsPage {
             VStack(alignment: .leading, spacing: 0) {
                 if wide {
                     WideBack(title: "Ad blocker & DNS", theme: theme) {
@@ -256,8 +270,10 @@ struct AppShell: View {
                 theme: theme,
                 wide: wide,
                 passwordSaved: passwordSaved,
+                sessionActive: sessionActive,
                 onPage: { onDNSPage($0) },
-                onSavePassword: onSavePassword
+                onSavePassword: onSavePassword,
+                onSignOut: { onPending(.signOutOfAdBlocker) }
             )
         }
     }

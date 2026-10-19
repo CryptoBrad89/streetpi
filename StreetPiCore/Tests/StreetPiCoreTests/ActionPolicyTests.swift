@@ -39,37 +39,38 @@ final class ActionPolicyTests: XCTestCase {
         )
     }
 
-    func testWritesExplainThemselvesWithoutFaceID() {
+    func testFilterWritesExplainThemselvesWithoutFaceID() throws {
         let stop = ActionPolicy.confirmation(for: .stopService(named: "Media"))
-        let dns = ActionPolicy.confirmation(for: .changeDNSSettings)
-        let pause = ActionPolicy.confirmation(for: .pauseAdBlocking(.untilTurnedBackOn))
+        let pause = ActionPolicy.confirmation(for: .pauseAdBlocking(.fiveMinutes))
         let resume = ActionPolicy.confirmation(for: .resumeAdBlocking)
+        let block = ActionPolicy.confirmation(for: .blockDomain(named: "ads.example.test"))
+        let allow = ActionPolicy.confirmation(for: .allowDomain(named: "news.example.test"))
+        let custom = try XCTUnwrap(PauseLength(seconds: 12 * 60))
+        let customPause = ActionPolicy.confirmation(for: .pauseAdBlocking(custom))
 
-        for confirmation in [stop, dns, pause, resume] {
+        for confirmation in [stop, pause, resume, block, allow, customPause] {
             XCTAssertFalse(confirmation.requiresFaceID)
             XCTAssertFalse(confirmation.explanation?.isEmpty ?? true)
         }
         XCTAssertTrue(stop.explanation?.contains("Media will stop") ?? false)
-        XCTAssertTrue(pause.explanation?.contains("whole house") ?? false)
-        let timed = ActionPolicy.confirmation(for: .pauseAdBlocking(.fiveMinutes))
-        XCTAssertFalse(timed.requiresFaceID)
-        XCTAssertTrue(timed.explanation?.contains("5 minutes") ?? false)
-        XCTAssertTrue(ActionPolicy.confirmation(for: .restartDNS).requiresFaceID)
-        XCTAssertTrue(ActionPolicy.confirmation(for: .flushQueryLog).requiresFaceID)
-        XCTAssertTrue(
-            ActionPolicy.confirmation(for: .removeDNSEntry(.client, named: "Living room")).requiresFaceID
-        )
-        XCTAssertFalse(ActionPolicy.confirmation(for: .updateBlockLists).requiresFaceID)
+        XCTAssertTrue(pause.explanation?.contains("5 minutes") ?? false)
+        XCTAssertTrue(pause.explanation?.contains("turns itself back on") ?? false)
+        XCTAssertTrue(customPause.explanation?.contains("12 minutes") ?? false)
+        XCTAssertTrue(resume.explanation?.contains("turn back on") ?? false)
+        XCTAssertEqual(block.explanation, "ads.example.test will be blocked for the whole house.")
+        XCTAssertEqual(allow.explanation, "news.example.test will be allowed for the whole house.")
+        XCTAssertFalse(ActionPolicy.confirmation(for: .signOutOfAdBlocker).requiresFaceID)
     }
 
-    func testCopyDoesNotNameAPersonOrAPrivateAddress() {
+    func testCopyDoesNotNameAPersonOrAPrivateAddress() throws {
+        let custom = try XCTUnwrap(PauseLength(seconds: 120))
         let actions: [HouseholdAction] = [
             .reboot, .shutDown, .stopService(named: "Media"), .deleteFiles(count: 2),
-            .changeDNSSettings, .killProcess(named: "example-daemon"),
-            .pauseAdBlocking(.fiveMinutes), .resumeAdBlocking,
-            .restartDNS, .flushQueryLog, .updateBlockLists,
-            .removeDNSEntry(.domain, named: "ads.example.test"),
-            .addDomain(named: "ads.example.test", blocked: true),
+            .killProcess(named: "example-daemon"),
+            .pauseAdBlocking(.fiveMinutes), .pauseAdBlocking(custom), .resumeAdBlocking,
+            .blockDomain(named: "ads.example.test"),
+            .allowDomain(named: "news.example.test"),
+            .signOutOfAdBlocker,
         ]
         for action in actions {
             let text = ActionPolicy.confirmation(for: action).explanation ?? ""

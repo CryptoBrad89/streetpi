@@ -138,8 +138,36 @@ final class DesignSnapshotTests: XCTestCase {
             section: .group(.adBlockerAndDNS),
             screen: .ready(house),
             testName: "dns-confirm",
-            dnsPage: .upkeep,
-            pending: .restartDNS
+            dnsPage: .today,
+            pending: .pauseAdBlocking(.fiveMinutes)
+        )
+    }
+
+    func testDNSAllow() {
+        assertMatrix(
+            section: .group(.adBlockerAndDNS),
+            screen: .ready(house),
+            testName: "dns-allow",
+            dnsPage: .queryLog,
+            pending: .allowDomain(named: "news.example.test")
+        )
+    }
+
+    func testDNSSetup() {
+        assertMatrix(
+            section: .group(.adBlockerAndDNS),
+            screen: .ready(house),
+            testName: "dns-setup",
+            showsSetup: true
+        )
+    }
+
+    func testDNSRefused() {
+        assertMatrix(
+            section: .group(.adBlockerAndDNS),
+            screen: .ready(house),
+            testName: "dns-refused",
+            dnsProblem: .refused
         )
     }
 
@@ -177,7 +205,9 @@ final class DesignSnapshotTests: XCTestCase {
         screen: HouseScreen,
         testName: String,
         dnsPage: DNSPage? = nil,
-        pending: HouseholdAction? = nil
+        pending: HouseholdAction? = nil,
+        showsSetup: Bool = false,
+        dnsProblem: PiholeProblem? = nil
     ) {
         for scheme in [ColorScheme.dark, ColorScheme.light] {
             for size in SnapshotScale.allCases {
@@ -190,7 +220,9 @@ final class DesignSnapshotTests: XCTestCase {
                         onSection: { _ in },
                         onAppearance: { _ in },
                         dnsPage: dnsPage,
-                        pendingAction: pending
+                        pendingAction: pending,
+                        showsSetup: showsSetup,
+                        dnsProblem: dnsProblem
                     )
                     .environment(\.colorScheme, scheme)
                     .environment(\.dynamicTypeSize, size.dynamicType)

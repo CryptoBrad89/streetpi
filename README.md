@@ -4,7 +4,7 @@ StreetPi is a native iPhone and iPad app for the Street house. One app, one expe
 
 The screen is drawn from fake fixtures. It does not talk to the Pi, the router, or any other host.
 
-Ad blocker & DNS opens the filter: today's picture and a sample 24-hour chart, a blocking pause, statistics, the query log, a live log, services, clients, groups, domains, block lists, local names, and upkeep. Writes ask in plain English first. The hardest ones ask for Face ID. The app password stays in the Keychain. Query logging is off in the fixture, so the log and the top lists explain why they are empty.
+Ad blocker & DNS opens the filter. Today shows blocking and a 24-hour chart of lookups. The only writes are a timed pause, blocking one domain, and allowing one domain. Each one asks in plain English first. Clients, groups, lists, local names, and upkeep are read-only. The text log file can be off; lookups are still kept. The app password and the Pi certificate pin stay in the Keychain. Nothing in this build opens a socket.
 
 ## Look
 

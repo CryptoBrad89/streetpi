@@ -36,6 +36,46 @@ public struct NamedRow: Sendable, Equatable, Identifiable, Codable {
     }
 }
 
+public struct DNSCount: Sendable, Equatable, Identifiable, Codable {
+    public var name: String
+    public var count: Int
+
+    public var id: String { name }
+
+    public init(name: String, count: Int) {
+        self.name = name
+        self.count = count
+    }
+}
+
+public struct DNSQuery: Sendable, Equatable, Identifiable, Codable {
+    public enum Outcome: String, Sendable, Equatable, Codable {
+        case allowed
+        case blocked
+
+        public var word: String {
+            switch self {
+            case .allowed: "Allowed"
+            case .blocked: "Blocked"
+            }
+        }
+    }
+
+    public var id: String
+    public var domain: String
+    public var client: String
+    public var outcome: Outcome
+    public var at: Date
+
+    public init(id: String, domain: String, client: String, outcome: Outcome, at: Date) {
+        self.id = id
+        self.domain = domain
+        self.client = client
+        self.outcome = outcome
+        self.at = at
+    }
+}
+
 public struct DNSListRow: Sendable, Equatable, Identifiable, Codable {
     public var id: String
     public var name: String
@@ -47,6 +87,10 @@ public struct DNSListRow: Sendable, Equatable, Identifiable, Codable {
         self.name = name
         self.host = host
         self.enabled = enabled
+    }
+
+    public var statusWord: String {
+        enabled ? "On" : "Off"
     }
 }
 
@@ -64,31 +108,59 @@ public struct DNSServiceChoice: Sendable, Equatable, Identifiable, Codable {
     }
 }
 
-public enum DNSEntryKind: String, Sendable, Equatable, Codable {
-    case client
-    case group
-    case domain
-    case blockList
-    case localName
+public struct HistoryPoint: Sendable, Equatable {
+    public var timestamp: TimeInterval
+    public var total: Int
+    public var blocked: Int
+
+    public init(timestamp: TimeInterval, total: Int, blocked: Int) {
+        self.timestamp = timestamp
+        self.total = total
+        self.blocked = blocked
+    }
+}
+
+public enum DayChartBuilder {
+    /// Oldest hour is index 0. Empty input is 24 quiet hours, not a sample.
+    public static func hours(from points: [HistoryPoint], ending: Date) -> [DayChartSample] {
+        let end = ending.timeIntervalSince1970
+        let start = end - 24 * 3_600
+        var allowed = Array(repeating: 0, count: 24)
+        var blocked = Array(repeating: 0, count: 24)
+        for point in points {
+            guard point.timestamp >= start, point.timestamp < end else { continue }
+            let index = min(23, max(0, Int((point.timestamp - start) / 3_600)))
+            blocked[index] += max(0, point.blocked)
+            allowed[index] += max(0, point.total - point.blocked)
+        }
+        return (0..<24).map { hour in
+            DayChartSample(hour: hour, allowed: allowed[hour], blocked: blocked[hour])
+        }
+    }
 }
 
 public enum DNSCopy {
-    public static let queryLogTitle = "Nothing to show."
-    public static let queryLogDetail = """
-    Query logging is off, so the Pi is not keeping a list of lookups. Ads are still being blocked.
+    public static let emptyQueriesTitle = "No lookups yet."
+    public static let emptyQueriesDetail = "When a device looks something up, it will show up here."
+    public static let emptyLiveTitle = "Quiet right now."
+    public static let emptyLiveDetail = "New lookups will appear here as they happen."
+    public static let emptyTopsTitle = "No top lists yet."
+    public static let emptyTopsDetail = "Once lookups come in, the busiest names and devices show up here."
+    public static let emptyChartTitle = "No lookups in the last day."
+    public static let emptyChartDetail = "The last day will show here once a device looks something up."
+    public static let localNamesNote = "These names stay on the Pi. This phone can read them."
+    public static let upkeepDetail = """
+    The text log file is off. Lookups are still kept in memory and in the history, back to July. \
+    This phone does not change settings on the Pi.
     """
-    public static let liveLogTitle = "Nothing is streaming."
-    public static let liveLogDetail = """
-    A live list needs query logging, and that is off. Ads are still being blocked.
-    """
-    public static let topListsTitle = "No top lists yet."
-    public static let topListsDetail = """
-    Those lists come from the query log, and logging is off. Ads are still being blocked.
-    """
-    public static let chartCaption = """
-    Query logging is off, so a live chart would be empty. This sample shows the shape of the last day.
-    """
-    public static let localNameNotice = """
-    Saving a local name on the Pi needs a setting StreetPi will not change. You can still read the names here.
-    """
+}
+
+public enum QueryOutcomeMap {
+    public static func outcome(status: String) -> DNSQuery.Outcome {
+        let upper = status.uppercased()
+        if upper.contains("GRAVITY") || upper.contains("DENY") {
+            return .blocked
+        }
+        return .allowed
+    }
 }
