@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		E1A100000000000000000014 /* StreetPiCore in Frameworks */ = {isa = PBXBuildFile; productRef = E1A100000000000000000016 /* StreetPiCore */; };
 		E1A100000000000000000015 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = E1A100000000000000000017 /* SnapshotTesting */; };
+		E1A100000000000000000040 /* SwiftTerm in Frameworks */ = {isa = PBXBuildFile; productRef = E1A100000000000000000046 /* SwiftTerm */; };
+		E1A100000000000000000041 /* NIOSSH in Frameworks */ = {isa = PBXBuildFile; productRef = E1A100000000000000000047 /* NIOSSH */; };
+		E1A100000000000000000042 /* Runestone in Frameworks */ = {isa = PBXBuildFile; productRef = E1A100000000000000000048 /* Runestone */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -61,6 +64,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				E1A100000000000000000014 /* StreetPiCore in Frameworks */,
+				E1A100000000000000000040 /* SwiftTerm in Frameworks */,
+				E1A100000000000000000041 /* NIOSSH in Frameworks */,
+				E1A100000000000000000042 /* Runestone in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,6 +131,9 @@
 			name = StreetPi;
 			packageProductDependencies = (
 				E1A100000000000000000016 /* StreetPiCore */,
+				E1A100000000000000000046 /* SwiftTerm */,
+				E1A100000000000000000047 /* NIOSSH */,
+				E1A100000000000000000048 /* Runestone */,
 			);
 			productName = StreetPi;
 			productReference = E1A100000000000000000007 /* StreetPi.app */;
@@ -176,6 +185,9 @@
 			packageReferences = (
 				E1A100000000000000000018 /* XCLocalSwiftPackageReference "StreetPiCore" */,
 				E1A100000000000000000019 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
+				E1A100000000000000000043 /* XCRemoteSwiftPackageReference "SwiftTerm" */,
+				E1A100000000000000000044 /* XCRemoteSwiftPackageReference "swift-nio-ssh" */,
+				E1A100000000000000000045 /* XCRemoteSwiftPackageReference "Runestone" */,
 			);
 			productRefGroup = E1A100000000000000000003 /* Products */;
 			projectDirPath = "";
@@ -345,6 +357,30 @@
 				minimumVersion = 1.18.0;
 			};
 		};
+		E1A100000000000000000043 /* XCRemoteSwiftPackageReference "SwiftTerm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/migueldeicaza/SwiftTerm";
+			requirement = {
+				kind = exactVersion;
+				version = 1.99.0;
+			};
+		};
+		E1A100000000000000000044 /* XCRemoteSwiftPackageReference "swift-nio-ssh" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-nio-ssh";
+			requirement = {
+				kind = exactVersion;
+				version = 0.15.0;
+			};
+		};
+		E1A100000000000000000045 /* XCRemoteSwiftPackageReference "Runestone" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/simonbs/Runestone";
+			requirement = {
+				kind = exactVersion;
+				version = 0.5.2;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -357,6 +393,21 @@
 			isa = XCSwiftPackageProductDependency;
 			package = E1A100000000000000000019 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
 			productName = SnapshotTesting;
+		};
+		E1A100000000000000000046 /* SwiftTerm */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E1A100000000000000000043 /* XCRemoteSwiftPackageReference "SwiftTerm" */;
+			productName = SwiftTerm;
+		};
+		E1A100000000000000000047 /* NIOSSH */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E1A100000000000000000044 /* XCRemoteSwiftPackageReference "swift-nio-ssh" */;
+			productName = NIOSSH;
+		};
+		E1A100000000000000000048 /* Runestone */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E1A100000000000000000045 /* XCRemoteSwiftPackageReference "Runestone" */;
+			productName = Runestone;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

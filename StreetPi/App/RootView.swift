@@ -1,3 +1,4 @@
+import CryptoKit
 import SwiftUI
 import StreetPiCore
 
@@ -8,8 +9,11 @@ struct RootView: View {
     @State private var showIntro = true
     @State private var desk = DNSDesk.houseFixture
     @State private var dnsPage: DNSPage?
+    @State private var machine = MachineDesk.houseFixture
+    @State private var machinePage: MachinePage?
     @State private var pending: HouseholdAction?
     @State private var passwordSaved = false
+    @State private var keySaved = false
     @State private var showPassword = false
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.secretStore) private var secretStore
@@ -31,13 +35,20 @@ struct RootView: View {
                     if next != .group(.adBlockerAndDNS) {
                         dnsPage = nil
                     }
+                    if next != .group(.piHealth) {
+                        machinePage = nil
+                    }
                 },
                 onAppearance: { appearanceRaw = $0.rawValue },
                 desk: desk,
                 dnsPage: dnsPage,
+                machine: machine,
+                machinePage: machinePage,
                 pendingAction: pending,
                 passwordSaved: passwordSaved,
+                keySaved: keySaved,
                 onDNSPage: { dnsPage = $0 },
+                onMachinePage: { machinePage = $0 },
                 onPending: { pending = $0 },
                 onConfirm: { action in
                     Task { await confirm(action) }
@@ -68,6 +79,19 @@ struct RootView: View {
             }
             let stored = try? secretStore.load(for: AppPassword.account)
             passwordSaved = stored != nil
+            ensureDeviceSecrets()
+        }
+    }
+
+    private func ensureDeviceSecrets() {
+        let account = DeviceSecret.privateKeyAccount
+        if (try? secretStore.load(for: account)) == nil {
+            let raw = Curve25519.Signing.PrivateKey().rawRepresentation
+            try? secretStore.save(raw, for: account)
+        }
+        keySaved = (try? secretStore.load(for: account)) != nil
+        if (try? secretStore.load(for: HostPin.account)) == nil {
+            try? secretStore.save(Data(machine.hostPin.utf8), for: HostPin.account)
         }
     }
 
@@ -86,6 +110,7 @@ struct RootView: View {
             guard allowed else { return }
         }
         desk = desk.applying(action)
+        machine = machine.applying(action)
         pending = nil
     }
 }

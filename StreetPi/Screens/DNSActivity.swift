@@ -2,8 +2,13 @@ import SwiftUI
 import StreetPiCore
 
 struct DNSStatistics: View {
+    var clients: [NamedRow]
+    var domains: [NamedRow]
+    var blocked: [NamedRow]
     var theme: StreetTheme
     var wide: Bool
+
+    private var isEmpty: Bool { clients.isEmpty && domains.isEmpty && blocked.isEmpty }
 
     var body: some View {
         DeskScroll(wide: wide) {
@@ -11,10 +16,23 @@ struct DNSStatistics: View {
                 .font(.system(.largeTitle, design: .rounded))
                 .foregroundStyle(theme.ink)
                 .accessibilityAddTraits(.isHeader)
-            EmptyNote(title: DNSCopy.topListsTitle, detail: DNSCopy.topListsDetail, theme: theme)
-            heading("Busiest devices")
-            heading("Busiest names")
-            heading("Most often blocked")
+            if isEmpty {
+                EmptyNote(title: DNSCopy.topListsTitle, detail: DNSCopy.topListsDetail, theme: theme)
+            }
+            list("Busiest devices", clients)
+            list("Busiest names", domains)
+            list("Most often blocked", blocked)
+        }
+    }
+
+    @ViewBuilder
+    private func list(_ title: String, _ rows: [NamedRow]) -> some View {
+        heading(title)
+        ForEach(rows) { row in
+            Text("\(row.name)  \(row.detail)")
+                .font(.body)
+                .foregroundStyle(theme.ink)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -30,6 +48,7 @@ struct DNSLogScreen: View {
     var title: String
     var emptyTitle: String
     var emptyDetail: String
+    var rows: [NamedRow]
     var theme: StreetTheme
     var wide: Bool
 
@@ -41,7 +60,21 @@ struct DNSLogScreen: View {
                 .lineLimit(2)
                 .minimumScaleFactor(0.6)
                 .accessibilityAddTraits(.isHeader)
-            EmptyNote(title: emptyTitle, detail: emptyDetail, theme: theme)
+            if rows.isEmpty {
+                EmptyNote(title: emptyTitle, detail: emptyDetail, theme: theme)
+            } else {
+                ForEach(rows) { row in
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(row.name)
+                            .font(.headline)
+                            .foregroundStyle(theme.ink)
+                        Text(row.detail)
+                            .font(.subheadline)
+                            .foregroundStyle(theme.secondary)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
         }
     }
 }

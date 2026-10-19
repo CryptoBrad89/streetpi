@@ -13,6 +13,8 @@ xcodebuild \
   -configuration Release \
   -sdk iphoneos \
   -derivedDataPath "${DERIVED}" \
+  -skipPackagePluginValidation \
+  -skipMacroValidation \
   CODE_SIGNING_ALLOWED=NO \
   CODE_SIGNING_REQUIRED=NO \
   CODE_SIGN_IDENTITY="" \

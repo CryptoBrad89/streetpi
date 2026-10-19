@@ -21,6 +21,16 @@ public enum HouseholdAction: Sendable, Equatable {
     case updateBlockLists
     case restartDNS
     case flushQueryLog
+    case stopMachineService(named: String)
+    case startMachineService(named: String)
+    case stopContainer(named: String)
+    case startContainer(named: String)
+    case saveFile(named: String)
+    case runBackup
+    case installUpdates
+    case setPin(named: String, on: Bool)
+    case addCron(named: String)
+    case removeCron(named: String)
 }
 
 public enum Confirmation: Sendable, Equatable {
@@ -58,7 +68,8 @@ public enum ActionPolicy {
 
     private static func isDestructive(_ action: HouseholdAction) -> Bool {
         switch action {
-        case .reboot, .shutDown, .deleteFiles, .killProcess, .restartDNS, .flushQueryLog, .removeDNSEntry:
+        case .reboot, .shutDown, .deleteFiles, .killProcess, .restartDNS, .flushQueryLog,
+             .removeDNSEntry, .removeCron:
             true
         default:
             false
@@ -82,6 +93,8 @@ public enum ActionPolicy {
             return "The saved lookup history will be erased. This cannot be undone."
         case .removeDNSEntry(_, let name):
             return "\(name) will be removed for the whole house. This cannot be undone."
+        case .removeCron(let name):
+            return "\(name) will be removed from the schedule. This cannot be undone."
         default:
             return "This change is hard to undo."
         }
@@ -105,8 +118,36 @@ public enum ActionPolicy {
             return "The Pi will download the latest block lists. Lookups may be slow for a minute."
         case .addDomain, .addClient, .addGroup, .addBlockList, .addLocalName:
             return addCopy(action)
+        case .stopMachineService, .startMachineService, .stopContainer, .startContainer,
+             .saveFile, .runBackup, .installUpdates, .setPin, .addCron:
+            return machineCopy(action)
         default:
             return "This will change the house."
+        }
+    }
+
+    private static func machineCopy(_ action: HouseholdAction) -> String {
+        switch action {
+        case .stopMachineService(let name):
+            return "\(name) will stop until someone starts it again."
+        case .startMachineService(let name):
+            return "\(name) will start."
+        case .stopContainer(let name):
+            return "\(name) will stop. The rest of the house stays up."
+        case .startContainer(let name):
+            return "\(name) will start."
+        case .saveFile(let name):
+            return "\(name) will be replaced with what is on the screen."
+        case .runBackup:
+            return "The weekly copy will run now. The Pi may be busy for a while."
+        case .installUpdates:
+            return "The Pi will install the waiting updates. It may need a restart afterwards."
+        case .setPin(let name, let on):
+            return on ? "\(name) will turn on." : "\(name) will turn off."
+        case .addCron(let name):
+            return "\(name) will be added to the schedule."
+        default:
+            return "This will change the Pi."
         }
     }
 

@@ -14,6 +14,12 @@ public struct DNSDesk: Sendable, Equatable, Codable {
     public var lists: [DNSListRow]
     public var localNames: [NamedRow]
     public var services: [DNSServiceChoice]
+    /// True only when the Pi allows the app password to change config. StreetPi does not turn this on.
+    public var configWritesAllowed: Bool
+    public var queries: [NamedRow]
+    public var topClients: [NamedRow]
+    public var topDomains: [NamedRow]
+    public var topBlocked: [NamedRow]
 
     public init(
         queryLoggingEnabled: Bool,
@@ -28,7 +34,12 @@ public struct DNSDesk: Sendable, Equatable, Codable {
         domains: [NamedRow],
         lists: [DNSListRow],
         localNames: [NamedRow],
-        services: [DNSServiceChoice]
+        services: [DNSServiceChoice],
+        configWritesAllowed: Bool = false,
+        queries: [NamedRow] = [],
+        topClients: [NamedRow] = [],
+        topDomains: [NamedRow] = [],
+        topBlocked: [NamedRow] = []
     ) {
         self.queryLoggingEnabled = queryLoggingEnabled
         self.blocking = blocking
@@ -43,19 +54,20 @@ public struct DNSDesk: Sendable, Equatable, Codable {
         self.lists = lists
         self.localNames = localNames
         self.services = services
+        self.configWritesAllowed = configWritesAllowed
+        self.queries = queries
+        self.topClients = topClients
+        self.topDomains = topDomains
+        self.topBlocked = topBlocked
     }
 }
 
 extension DNSDesk {
-    public static let houseFixture: DNSDesk = {
-        let samples = (0..<24).map { hour in
-            DayChartSample(hour: hour, allowed: 40 + (hour * 7) % 30, blocked: 8 + (hour * 3) % 12)
-        }
-        return DNSDesk(
+    public static let houseFixture = DNSDesk(
             queryLoggingEnabled: false,
             blocking: DNSBlocking(enabled: true),
-            chartIsSample: true,
-            day: samples,
+            chartIsSample: false,
+            day: [],
             knownClients: 4,
             listCount: 2,
             listsUpdatedAt: Date.streetFixtureNow.addingTimeInterval(-2 * 86_400),
@@ -101,6 +113,24 @@ extension DNSDesk {
                 ),
             ]
         )
+
+    /// The house after query logging is on and local names can be saved. The Pi is not changed here.
+    public static let loggingOnFixture: DNSDesk = {
+        var desk = houseFixture
+        desk.queryLoggingEnabled = true
+        desk.configWritesAllowed = true
+        desk.chartIsSample = false
+        desk.day = (0..<24).map { hour in
+            DayChartSample(hour: hour, allowed: 40 + (hour * 7) % 30, blocked: 8 + (hour * 3) % 12)
+        }
+        desk.queries = [
+            NamedRow(id: "q1", name: "ads.example.test", detail: "Blocked"),
+            NamedRow(id: "q2", name: "printer.fixture.local", detail: "Allowed"),
+        ]
+        desk.topClients = [NamedRow(id: "living-room", name: "Living room", detail: "12")]
+        desk.topDomains = [NamedRow(id: "ads", name: "ads.example.test", detail: "9")]
+        desk.topBlocked = [NamedRow(id: "ads-blocked", name: "ads.example.test", detail: "9")]
+        return desk
     }()
 
     public var blockingLine: String {

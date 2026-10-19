@@ -10,9 +10,13 @@ struct AppShell: View {
     var onAppearance: (AppearancePreference) -> Void
     var desk: DNSDesk = .houseFixture
     var dnsPage: DNSPage?
+    var machine: MachineDesk = .houseFixture
+    var machinePage: MachinePage?
     var pendingAction: HouseholdAction?
     var passwordSaved: Bool = true
+    var keySaved: Bool = true
     var onDNSPage: (DNSPage?) -> Void = { _ in }
+    var onMachinePage: (MachinePage?) -> Void = { _ in }
     var onPending: (HouseholdAction?) -> Void = { _ in }
     var onConfirm: (HouseholdAction) -> Void = { _ in }
     var onSavePassword: () -> Void = {}
@@ -77,23 +81,26 @@ struct AppShell: View {
     }
 
     private var sidebar: some View {
-        VStack(alignment: .leading, spacing: Rhythm.line) {
-            Text("StreetPi")
-                .font(.system(.title3, design: .rounded))
-                .foregroundStyle(theme.ink)
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
-                .padding(.bottom, Rhythm.line)
-                .accessibilityAddTraits(.isHeader)
-            sidebarButton("Home", section: .home)
-            ForEach(groups) { group in
-                sidebarButton(group.title, section: .group(group.id))
+        ScrollView {
+            VStack(alignment: .leading, spacing: Rhythm.line) {
+                Text("StreetPi")
+                    .font(.system(.title3, design: .rounded))
+                    .foregroundStyle(theme.ink)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                    .padding(.bottom, Rhythm.line)
+                    .accessibilityAddTraits(.isHeader)
+                sidebarButton("Home", section: .home)
+                ForEach(groups) { group in
+                    sidebarButton(group.title, section: .group(group.id))
+                }
+                sidebarButton("Alerts", section: .alerts)
+                sidebarButton("Settings", section: .settings)
             }
-            sidebarButton("Settings", section: .settings)
-            Spacer(minLength: 0)
+            .padding(Rhythm.page)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(Rhythm.page)
-        .frame(maxHeight: .infinity, alignment: .topLeading)
+        .scrollIndicators(.hidden)
     }
 
     private func sidebarButton(_ title: String, section target: AppSection) -> some View {
@@ -151,35 +158,57 @@ struct AppShell: View {
         switch section {
         case .home, .settings:
             "StreetPi"
+        case .alerts:
+            "Alerts"
         case .group(let group):
-            if group == .adBlockerAndDNS, let dnsPage {
-                dnsPage.title
-            } else {
-                group.title
-            }
+            nestedTitle(group)
         }
+    }
+
+    private func nestedTitle(_ group: HouseGroup) -> String {
+        if group == .adBlockerAndDNS, let dnsPage {
+            return dnsPage.title
+        }
+        if group == .piHealth, let machinePage {
+            return machinePage.title
+        }
+        return group.title
     }
 
     @ViewBuilder
     private var chromeButton: some View {
         switch section {
         case .group(let group):
-            if group == .adBlockerAndDNS, dnsPage != nil {
-                IconChromeButton(title: "Ad blocker & DNS", systemImage: "chevron.backward") {
-                    onDNSPage(nil)
-                }
-            } else {
-                IconChromeButton(title: "Home", systemImage: "chevron.backward") {
-                    onSection(.home)
-                }
-            }
-        case .settings:
+            groupBack(group)
+        case .settings, .alerts:
             IconChromeButton(title: "Home", systemImage: "house") {
                 onSection(.home)
             }
         case .home:
-            IconChromeButton(title: "Settings", systemImage: "gearshape") {
-                onSection(.settings)
+            HStack(spacing: 8) {
+                IconChromeButton(title: "Alerts", systemImage: "bell") {
+                    onSection(.alerts)
+                }
+                IconChromeButton(title: "Settings", systemImage: "gearshape") {
+                    onSection(.settings)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func groupBack(_ group: HouseGroup) -> some View {
+        if group == .adBlockerAndDNS, dnsPage != nil {
+            IconChromeButton(title: "Ad blocker & DNS", systemImage: "chevron.backward") {
+                onDNSPage(nil)
+            }
+        } else if group == .piHealth, machinePage != nil {
+            IconChromeButton(title: "Pi health", systemImage: "chevron.backward") {
+                onMachinePage(nil)
+            }
+        } else {
+            IconChromeButton(title: "Home", systemImage: "chevron.backward") {
+                onSection(.home)
             }
         }
     }
@@ -198,9 +227,13 @@ struct AppShell: View {
                 wide: wide,
                 onGroup: { onSection(.group($0)) }
             )
+        case .alerts:
+            AlertsScreen(alerts: machine.alerts, theme: theme, wide: wide)
         case .group(let group):
             if group == .adBlockerAndDNS {
                 dnsDetail(wide: wide)
+            } else if group == .piHealth {
+                machineDetail(wide: wide)
             } else if let brief = groups.first(where: { $0.id == group }) {
                 GroupDashboard(
                     theme: theme,
@@ -258,6 +291,39 @@ struct AppShell: View {
                 passwordSaved: passwordSaved,
                 onPage: { onDNSPage($0) },
                 onSavePassword: onSavePassword
+            )
+        }
+    }
+
+    @ViewBuilder
+    private func machineDetail(wide: Bool) -> some View {
+        if let machinePage {
+            VStack(alignment: .leading, spacing: 0) {
+                if wide {
+                    WideBack(title: "Pi health", theme: theme) {
+                        onMachinePage(nil)
+                    }
+                    .padding(.horizontal, Rhythm.page)
+                    .padding(.top, Rhythm.line)
+                }
+                MachinePageBody(
+                    page: machinePage,
+                    desk: machine,
+                    machine: screen.snapshot?.machine,
+                    theme: theme,
+                    wide: wide,
+                    now: now,
+                    keySaved: keySaved,
+                    onAction: { onPending($0) }
+                )
+            }
+        } else if let reading = screen.snapshot?.machine {
+            MachineHome(
+                desk: machine,
+                machine: reading,
+                theme: theme,
+                wide: wide,
+                onPage: { onMachinePage($0) }
             )
         }
     }

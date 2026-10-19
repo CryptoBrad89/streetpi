@@ -14,12 +14,19 @@ struct DNSPageBody: View {
         case .today:
             DNSToday(desk: desk, theme: theme, wide: wide, now: now, onAction: onAction)
         case .statistics:
-            DNSStatistics(theme: theme, wide: wide)
+            DNSStatistics(
+                clients: desk.topClients,
+                domains: desk.topDomains,
+                blocked: desk.topBlocked,
+                theme: theme,
+                wide: wide
+            )
         case .queryLog:
             DNSLogScreen(
                 title: page.title,
                 emptyTitle: DNSCopy.queryLogTitle,
                 emptyDetail: DNSCopy.queryLogDetail,
+                rows: desk.queries,
                 theme: theme,
                 wide: wide
             )
@@ -28,6 +35,7 @@ struct DNSPageBody: View {
                 title: page.title,
                 emptyTitle: DNSCopy.liveLogTitle,
                 emptyDetail: DNSCopy.liveLogDetail,
+                rows: desk.queryLoggingEnabled ? desk.queries : [],
                 theme: theme,
                 wide: wide
             )
@@ -55,9 +63,10 @@ struct DNSPageBody: View {
             manage(
                 intro: "Names that stay inside the house.",
                 rows: desk.localNames,
-                notice: DNSCopy.localNameNotice,
+                notice: desk.configWritesAllowed ? nil : DNSCopy.localNameNotice,
                 add: "A house name",
-                kind: .localName
+                kind: .localName,
+                canWrite: desk.configWritesAllowed
             )
         case .upkeep:
             DNSUpkeep(desk: desk, theme: theme, wide: wide, now: now, onAction: onAction)
@@ -69,7 +78,8 @@ struct DNSPageBody: View {
         rows: [NamedRow],
         notice: String? = nil,
         add: String,
-        kind: DNSEntryKind
+        kind: DNSEntryKind,
+        canWrite: Bool = true
     ) -> some View {
         ManageScreen(
             title: page.title,
@@ -77,6 +87,7 @@ struct DNSPageBody: View {
             rows: rows,
             notice: notice,
             addWord: add,
+            canWrite: canWrite,
             theme: theme,
             wide: wide,
             onAdd: { onAction(addAction($0, kind: kind)) },

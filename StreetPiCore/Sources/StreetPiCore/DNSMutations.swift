@@ -3,34 +3,47 @@ import Foundation
 extension DNSDesk {
     public func applying(_ action: HouseholdAction) -> DNSDesk {
         var copy = self
+        copy.applyBlocking(action)
+        copy.applyCatalog(action)
+        return copy
+    }
+
+    private mutating func applyBlocking(_ action: HouseholdAction) {
         switch action {
         case .pauseAdBlocking(let length):
-            copy.blocking = DNSBlocking(enabled: false, pause: length)
+            blocking = DNSBlocking(enabled: false, pause: length)
         case .resumeAdBlocking:
-            copy.blocking = DNSBlocking(enabled: true)
-        case .addDomain(let name, let blocked):
-            copy.domains.append(NamedRow(id: name, name: name, detail: blocked ? "Blocked" : "Allowed"))
-        case .addClient(let name):
-            copy.clients.append(NamedRow(id: name, name: name, detail: "Default"))
-            copy.knownClients = copy.clients.count
-        case .addGroup(let name):
-            copy.groups.append(NamedRow(id: name, name: name, detail: "No devices yet"))
-        case .addBlockList(let name):
-            copy.lists.append(DNSListRow(id: name, name: name, host: "fixture.local", enabled: true))
-            copy.listCount = copy.lists.count
-        case .addLocalName(let name):
-            copy.localNames.append(NamedRow(id: name, name: name, detail: "Inside the house"))
-        case .removeDNSEntry(let kind, let name):
-            copy.remove(kind, named: name)
-        case .setServiceBlocked(let name, let blocked):
-            copy.setService(name, blocked: blocked)
+            blocking = DNSBlocking(enabled: true)
         case .updateBlockLists:
-            copy.listsUpdatedAt = .streetFixtureNow
-        case .restartDNS, .flushQueryLog, .refresh, .reboot, .shutDown, .stopService,
-             .deleteFiles, .changeDNSSettings, .killProcess:
+            listsUpdatedAt = .streetFixtureNow
+        case .setServiceBlocked(let name, let blocked):
+            setService(name, blocked: blocked)
+        default:
             break
         }
-        return copy
+    }
+
+    private mutating func applyCatalog(_ action: HouseholdAction) {
+        switch action {
+        case .addDomain(let name, let blocked):
+            domains.append(NamedRow(id: name, name: name, detail: blocked ? "Blocked" : "Allowed"))
+        case .addClient(let name):
+            clients.append(NamedRow(id: name, name: name, detail: "Default"))
+            knownClients = clients.count
+        case .addGroup(let name):
+            groups.append(NamedRow(id: name, name: name, detail: "No devices yet"))
+        case .addBlockList(let name):
+            lists.append(DNSListRow(id: name, name: name, host: "fixture.local", enabled: true))
+            listCount = lists.count
+        case .addLocalName(let name):
+            guard configWritesAllowed else { return }
+            localNames.append(NamedRow(id: name, name: name, detail: "Inside the house"))
+        case .removeDNSEntry(let kind, let name):
+            guard kind != .localName || configWritesAllowed else { return }
+            remove(kind, named: name)
+        default:
+            break
+        }
     }
 
     private mutating func remove(_ kind: DNSEntryKind, named name: String) {

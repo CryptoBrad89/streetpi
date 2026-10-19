@@ -143,8 +143,159 @@ final class DesignSnapshotTests: XCTestCase {
         )
     }
 
-    func testPiHealth() {
-        assertMatrix(section: .group(.piHealth), screen: .ready(house), testName: "pi-health")
+    func testDNSTodayLive() {
+        assertMatrix(
+            section: .group(.adBlockerAndDNS),
+            screen: .ready(house),
+            testName: "dns-today-live",
+            dnsPage: .today,
+            desk: .loggingOnFixture
+        )
+    }
+
+    func testDNSLocalWritable() {
+        assertMatrix(
+            section: .group(.adBlockerAndDNS),
+            screen: .ready(house),
+            testName: "dns-local-writable",
+            dnsPage: .localNames,
+            desk: .loggingOnFixture
+        )
+    }
+
+    func testMachineDashboard() {
+        assertMatrix(section: .group(.piHealth), screen: .ready(house), testName: "machine-dashboard")
+    }
+
+    func testMachineChart() {
+        assertMatrix(
+            section: .group(.piHealth),
+            screen: .ready(house),
+            testName: "machine-chart",
+            machinePage: .chart
+        )
+    }
+
+    func testMachineActivity() {
+        assertMatrix(
+            section: .group(.piHealth),
+            screen: .ready(house),
+            testName: "machine-activity",
+            machinePage: .activity
+        )
+    }
+
+    func testMachineServices() {
+        assertMatrix(
+            section: .group(.piHealth),
+            screen: .ready(house),
+            testName: "machine-services",
+            machinePage: .services
+        )
+    }
+
+    func testMachineContainers() {
+        assertMatrix(
+            section: .group(.piHealth),
+            screen: .ready(house),
+            testName: "machine-containers",
+            machinePage: .containers
+        )
+    }
+
+    func testMachineProcesses() {
+        assertMatrix(
+            section: .group(.piHealth),
+            screen: .ready(house),
+            testName: "machine-processes",
+            machinePage: .processes
+        )
+    }
+
+    func testMachineTerminal() {
+        assertMatrix(
+            section: .group(.piHealth),
+            screen: .ready(house),
+            testName: "machine-terminal",
+            machinePage: .terminal
+        )
+    }
+
+    func testMachineFiles() {
+        assertMatrix(
+            section: .group(.piHealth),
+            screen: .ready(house),
+            testName: "machine-files",
+            machinePage: .files
+        )
+    }
+
+    func testMachineEditor() {
+        assertMatrix(
+            section: .group(.piHealth),
+            screen: .ready(house),
+            testName: "machine-editor",
+            machinePage: .editor
+        )
+    }
+
+    func testMachineSchedule() {
+        assertMatrix(
+            section: .group(.piHealth),
+            screen: .ready(house),
+            testName: "machine-schedule",
+            machinePage: .schedule
+        )
+    }
+
+    func testMachinePins() {
+        assertMatrix(
+            section: .group(.piHealth),
+            screen: .ready(house),
+            testName: "machine-pins",
+            machinePage: .pins
+        )
+    }
+
+    func testMachineBackups() {
+        assertMatrix(
+            section: .group(.piHealth),
+            screen: .ready(house),
+            testName: "machine-backups",
+            machinePage: .backups
+        )
+    }
+
+    func testMachineUpdates() {
+        assertMatrix(
+            section: .group(.piHealth),
+            screen: .ready(house),
+            testName: "machine-updates",
+            machinePage: .updates
+        )
+    }
+
+    func testMachinePower() {
+        assertMatrix(
+            section: .group(.piHealth),
+            screen: .ready(house),
+            testName: "machine-power",
+            machinePage: .power
+        )
+    }
+
+    func testMachineReboot() {
+        assertMatrix(
+            section: .group(.piHealth),
+            screen: .ready(house),
+            testName: "machine-reboot",
+            machinePage: .power,
+            pending: .reboot
+        )
+    }
+
+    func testAlerts() {
+        assertMatrix(section: .alerts, screen: .ready(house), testName: "alerts")
     }
 
     func testSettings() {
@@ -177,6 +328,8 @@ final class DesignSnapshotTests: XCTestCase {
         screen: HouseScreen,
         testName: String,
         dnsPage: DNSPage? = nil,
+        desk: DNSDesk = .houseFixture,
+        machinePage: MachinePage? = nil,
         pending: HouseholdAction? = nil
     ) {
         for scheme in [ColorScheme.dark, ColorScheme.light] {
@@ -189,8 +342,11 @@ final class DesignSnapshotTests: XCTestCase {
                         now: now,
                         onSection: { _ in },
                         onAppearance: { _ in },
+                        desk: desk,
                         dnsPage: dnsPage,
-                        pendingAction: pending
+                        machinePage: machinePage,
+                        pendingAction: pending,
+                        keySaved: true
                     )
                     .environment(\.colorScheme, scheme)
                     .environment(\.dynamicTypeSize, size.dynamicType)
