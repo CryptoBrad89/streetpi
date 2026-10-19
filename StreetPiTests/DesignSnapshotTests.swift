@@ -34,6 +34,7 @@ final class DesignSnapshotTests: XCTestCase {
                     let view = IntroView(theme: theme, animatesIn: false) {}
                         .environment(\.colorScheme, scheme)
                         .environment(\.dynamicTypeSize, size.dynamicType)
+                        .environment(\.accessibilityReduceMotion, true)
                     assertSnapshot(
                         of: view,
                         as: .image(
@@ -52,6 +53,7 @@ final class DesignSnapshotTests: XCTestCase {
     }
 
     private func assertMatrix(direction: DesignDirection, section: AppSection) {
+        let sectionName = section == .home ? "home" : "settings"
         for scheme in [ColorScheme.dark, ColorScheme.light] {
             for size in SnapshotScale.allCases {
                 for device in SnapshotDevice.allCases {
@@ -67,13 +69,15 @@ final class DesignSnapshotTests: XCTestCase {
                     )
                     .environment(\.colorScheme, scheme)
                     .environment(\.dynamicTypeSize, size.dynamicType)
+                    .environment(\.accessibilityReduceMotion, true)
                     assertSnapshot(
                         of: view,
                         as: .image(
                             layout: .device(config: device.config),
                             traits: traits(scheme: scheme, size: size)
                         ),
-                        named: "\(name(scheme))-\(size.rawValue)-\(device.rawValue)"
+                        named: "\(name(scheme))-\(size.rawValue)-\(device.rawValue)",
+                        testName: "\(direction.rawValue)-\(sectionName)"
                     )
                 }
             }
