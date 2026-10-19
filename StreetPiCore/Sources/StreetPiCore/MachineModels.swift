@@ -12,39 +12,17 @@ public struct MetricPoint: Sendable, Equatable, Identifiable, Codable {
     }
 }
 
-public struct ActivityRow: Sendable, Equatable, Identifiable, Codable {
+public struct MetricSeries: Sendable, Equatable, Identifiable, Codable {
     public var id: String
-    public var when: Date
-    public var sentence: String
+    public var title: String
+    public var caption: String
+    public var points: [MetricPoint]
 
-    public init(id: String, when: Date, sentence: String) {
+    public init(id: String, title: String, caption: String, points: [MetricPoint]) {
         self.id = id
-        self.when = when
-        self.sentence = sentence
-    }
-}
-
-public struct HouseFile: Sendable, Equatable, Identifiable, Codable {
-    public var id: String
-    public var name: String
-    public var text: String
-
-    public init(id: String, name: String, text: String) {
-        self.id = id
-        self.name = name
-        self.text = text
-    }
-}
-
-public struct PinRow: Sendable, Equatable, Identifiable, Codable {
-    public var id: String
-    public var name: String
-    public var on: Bool
-
-    public init(id: String, name: String, on: Bool) {
-        self.id = id
-        self.name = name
-        self.on = on
+        self.title = title
+        self.caption = caption
+        self.points = points
     }
 }
 
@@ -63,77 +41,35 @@ public struct HouseAlert: Sendable, Equatable, Identifiable, Codable {
 public enum MachinePage: String, CaseIterable, Sendable, Equatable, Identifiable {
     case dashboard
     case chart
-    case activity
     case services
     case containers
-    case processes
-    case terminal
-    case files
-    case editor
-    case schedule
-    case pins
-    case backups
-    case updates
-    case power
 
     public var id: String { rawValue }
 
-    public var title: String { MachinePageCopy.title[self] ?? rawValue }
+    public var title: String {
+        switch self {
+        case .dashboard: "The Pi"
+        case .chart: "Charts"
+        case .services: "Services"
+        case .containers: "Containers"
+        }
+    }
 
-    public var blurb: String { MachinePageCopy.blurb[self] ?? "" }
+    public var blurb: String {
+        switch self {
+        case .dashboard: "How the Pi is doing right now."
+        case .chart: "The last day, from the charts."
+        case .services: "Up or down, from the status page."
+        case .containers: "The boxed jobs on the charts."
+        }
+    }
 
-    public var symbolName: String { MachinePageCopy.symbol[self] ?? "circle" }
-}
-
-private enum MachinePageCopy {
-    static let title: [MachinePage: String] = [
-        .dashboard: "The Pi",
-        .chart: "Charts",
-        .activity: "Activity",
-        .services: "Services",
-        .containers: "Containers",
-        .processes: "Processes",
-        .terminal: "Terminal",
-        .files: "Files",
-        .editor: "Editor",
-        .schedule: "Schedule",
-        .pins: "Pins",
-        .backups: "Copies",
-        .updates: "Updates",
-        .power: "Power",
-    ]
-
-    static let blurb: [MachinePage: String] = [
-        .dashboard: "How the Pi is doing right now.",
-        .chart: "One measurement over the last day.",
-        .activity: "What the Pi has been doing.",
-        .services: "The jobs that stay running.",
-        .containers: "The boxed jobs.",
-        .processes: "What is using the Pi right now.",
-        .terminal: "A sample session. Nothing is connected.",
-        .files: "Files in the house account.",
-        .editor: "Read and replace a file.",
-        .schedule: "Jobs that run on their own.",
-        .pins: "The Pi's little switches.",
-        .backups: "The weekly copy.",
-        .updates: "Software waiting to install.",
-        .power: "Restart or turn the Pi off.",
-    ]
-
-    static let symbol: [MachinePage: String] = [
-        .dashboard: "cpu",
-        .chart: "chart.xyaxis.line",
-        .activity: "clock",
-        .services: "gearshape",
-        .containers: "shippingbox",
-        .processes: "list.bullet",
-        .terminal: "terminal",
-        .files: "folder",
-        .editor: "doc.text",
-        .schedule: "calendar",
-        .pins: "circle.grid.3x3",
-        .backups: "externaldrive",
-        .updates: "arrow.down.circle",
-        .power: "power",
-    ]
+    public var symbolName: String {
+        switch self {
+        case .dashboard: "cpu"
+        case .chart: "chart.xyaxis.line"
+        case .services: "gearshape"
+        case .containers: "shippingbox"
+        }
+    }
 }

@@ -6,7 +6,7 @@ The screen is drawn from fake fixtures. It does not talk to the Pi, the router, 
 
 Ad blocker & DNS opens the filter. The house fixture has query logging off and local-name writes locked, so the log, the top lists, and the day chart explain why they are empty. A second fixture turns logging on and allows local names, and those screens fill in. Writes ask in plain English first. The hardest ones ask for Face ID. The app password stays in the Keychain.
 
-Pi health opens the machine: meters, a day chart, activity with a spreadsheet export, services, containers, processes, a sample terminal, files and an editor, the schedule, pins, the weekly copy, updates, and power. Alerts stay in the app. Nothing here opens a connection. The SSH key is generated on the phone and kept in the Keychain, and the sample host pin is stored beside it.
+Pi health is look-only. It shows meters for the processor, temperature, memory, disk, and uptime, plus a day chart. Services and containers are readings. Alerts stay in the app. Nothing here opens a connection, and the phone does not keep an SSH key or a host pin.
 
 ## Look
 
@@ -20,7 +20,7 @@ One direction. A warm rounded card says how the house is doing. Under it, labell
 
 Bundle id defaults to `com.streetfam.streetpi`. Override `STREETPI_BUNDLE_IDENTIFIER` in `Config/Shared.xcconfig`. `STREETPI_APP_GROUP_IDENTIFIER` is reserved and is not an entitlement yet.
 
-Secrets go in the iOS Keychain (`KeychainSecretStore`). Tests use `MemorySecretStore` and the strings `fixture-not-a-real-secret`, `fixture-not-a-real-password`, and `fixture-not-a-real-key`. Those strings are never printed.
+Secrets go in the iOS Keychain (`KeychainSecretStore`). Tests use `MemorySecretStore` and the strings `fixture-not-a-real-secret` and `fixture-not-a-real-password`. Those strings are never printed.
 
 ## CI
 

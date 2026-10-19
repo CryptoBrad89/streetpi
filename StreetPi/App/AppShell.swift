@@ -14,7 +14,6 @@ struct AppShell: View {
     var machinePage: MachinePage?
     var pendingAction: HouseholdAction?
     var passwordSaved: Bool = true
-    var keySaved: Bool = true
     var onDNSPage: (DNSPage?) -> Void = { _ in }
     var onMachinePage: (MachinePage?) -> Void = { _ in }
     var onPending: (HouseholdAction?) -> Void = { _ in }
@@ -312,9 +311,7 @@ struct AppShell: View {
                     machine: screen.snapshot?.machine,
                     theme: theme,
                     wide: wide,
-                    now: now,
-                    keySaved: keySaved,
-                    onAction: { onPending($0) }
+                    onPage: { onMachinePage($0) }
                 )
             }
         } else if let reading = screen.snapshot?.machine {
