@@ -2,7 +2,7 @@ import SwiftUI
 import StreetPiCore
 
 struct RootView: View {
-    var now: Date
+    @State private var clock: Date
     @State private var screen = HouseScreen.ready(.healthyFixture)
     @State private var section = AppSection.home
     @State private var showIntro = true
@@ -19,6 +19,10 @@ struct RootView: View {
     @Environment(\.secretStore) private var secretStore
     @AppStorage(PreferenceKey.appearance) private var appearanceRaw = AppearancePreference.system.rawValue
 
+    init(now: Date) {
+        _clock = State(initialValue: now)
+    }
+
     private var appearance: AppearancePreference {
         AppearancePreference(rawValue: appearanceRaw) ?? .system
     }
@@ -29,7 +33,7 @@ struct RootView: View {
                 section: section,
                 appearance: appearance,
                 screen: screen,
-                now: now,
+                now: clock,
                 onSection: { next in
                     section = next
                     if next != .group(.adBlockerAndDNS) {
@@ -74,14 +78,28 @@ struct RootView: View {
                 await client?.appDidEnterBackground()
             }
         }
-        .task {
-            let clock = now
-            let loader = HouseholdStatusLoader.healthyFixture { clock }
-            if let loaded = try? await loader.load() {
-                screen = .ready(loaded)
-            }
+        .task(id: scenePhase) {
+            guard scenePhase == .active else { return }
             let stored = try? secretStore.load(for: AppPassword.account)
             passwordSaved = stored != nil
+            await watchHouse()
+        }
+    }
+
+    /// Fixture refresh only. The poller is an actor, and the live socket stays off.
+    private func watchHouse() async {
+        let poller = HousePoller {
+            try await HouseholdStatusLoader.healthyFixture(now: { Date() }).load()
+        }
+        while !Task.isCancelled {
+            let tick = await poller.tick()
+            if tick.unreachable {
+                screen = .failed
+            } else if let snapshot = tick.snapshot {
+                clock = Date()
+                screen = .ready(snapshot)
+            }
+            try? await Task.sleep(for: .seconds(tick.waitSeconds))
         }
     }
 

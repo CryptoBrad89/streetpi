@@ -17,8 +17,6 @@ struct DNSHub: View {
                 Text("Ad blocker & DNS")
                     .font(.system(.largeTitle, design: .rounded))
                     .foregroundStyle(theme.ink)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.6)
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityAddTraits(.isHeader)
                 Text(desk.blockingLine)
@@ -61,11 +59,13 @@ struct DNSHub: View {
                 Button("Set up this phone", action: onSavePassword)
                     .font(.body.weight(.semibold))
                     .foregroundStyle(theme.accent)
+                    .frame(minHeight: 44, alignment: .leading)
             }
             if sessionActive {
                 Button("Sign out", action: onSignOut)
                     .font(.body.weight(.semibold))
                     .foregroundStyle(theme.accent)
+                    .frame(minHeight: 44, alignment: .leading)
             }
         }
         .padding(Rhythm.line)

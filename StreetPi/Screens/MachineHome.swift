@@ -6,6 +6,7 @@ struct MachineHome: View {
     var machine: MachineReading?
     var theme: StreetTheme
     var wide: Bool
+    var showsDestinations: Bool = true
     var onPage: (MachinePage) -> Void
 
     var body: some View {
@@ -35,9 +36,11 @@ struct MachineHome: View {
             if let uptime = machine?.uptimeSeconds {
                 meter("Uptime", ReadingText.uptime(uptime), nil)
             }
-            ForEach(MachinePage.allCases.filter { $0 != .dashboard }) { page in
-                DeskLink(title: page.title, blurb: page.blurb, symbol: page.symbolName, theme: theme) {
-                    onPage(page)
+            if showsDestinations {
+                ForEach(MachinePage.allCases.filter { $0 != .dashboard }) { page in
+                    DeskLink(title: page.title, blurb: page.blurb, symbol: page.symbolName, theme: theme) {
+                        onPage(page)
+                    }
                 }
             }
         }
@@ -47,9 +50,12 @@ struct MachineHome: View {
         VStack(alignment: .leading, spacing: Rhythm.tight) {
             ViewThatFits(in: .horizontal) {
                 HStack {
-                    Text(label).font(.subheadline).foregroundStyle(theme.secondary)
+                    Text(label).font(.subheadline).foregroundStyle(theme.secondary).fixedSize()
                     Spacer(minLength: Rhythm.line)
-                    Text(value).font(.system(.title3, design: .rounded)).foregroundStyle(theme.ink)
+                    Text(value)
+                        .font(.system(.title3, design: .rounded))
+                        .foregroundStyle(theme.ink)
+                        .fixedSize()
                 }
                 VStack(alignment: .leading, spacing: 2) {
                     Text(label).font(.subheadline).foregroundStyle(theme.secondary)

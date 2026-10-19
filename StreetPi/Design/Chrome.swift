@@ -47,10 +47,11 @@ struct SkipControl: View {
         if #available(iOS 26, *) {
             Button(title, action: action)
                 .buttonStyle(.glass)
+                .frame(minWidth: 44, minHeight: 44)
         } else {
             Button(title, action: action)
                 .padding(.horizontal, 16)
-                .padding(.vertical, 8)
+                .frame(minHeight: 44)
                 .background(.ultraThinMaterial, in: Capsule())
         }
     }
@@ -66,11 +67,33 @@ struct IconChromeButton: View {
             Button(title, systemImage: systemImage, action: action)
                 .labelStyle(.iconOnly)
                 .buttonStyle(.glass)
+                .frame(minWidth: 44, minHeight: 44)
         } else {
             Button(title, systemImage: systemImage, action: action)
                 .labelStyle(.iconOnly)
-                .padding(10)
+                .frame(minWidth: 44, minHeight: 44)
                 .background(.ultraThinMaterial, in: Circle())
+        }
+    }
+}
+
+struct ChromeButtonPair<First: View, Second: View>: View {
+    var first: First
+    var second: Second
+
+    var body: some View {
+        if #available(iOS 26, *) {
+            GlassEffectContainer(spacing: 8) {
+                HStack(spacing: 8) {
+                    first
+                    second
+                }
+            }
+        } else {
+            HStack(spacing: 8) {
+                first
+                second
+            }
         }
     }
 }

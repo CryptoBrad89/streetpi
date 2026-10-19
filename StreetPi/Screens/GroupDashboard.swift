@@ -54,8 +54,6 @@ struct GroupDashboard: View {
                     Text(brief.title)
                         .font(.system(.largeTitle, design: .rounded))
                         .foregroundStyle(theme.ink)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.6)
                         .fixedSize(horizontal: false, vertical: true)
                         .accessibilityAddTraits(.isHeader)
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
@@ -144,12 +142,12 @@ private struct MeterLine: View {
                     Text(label)
                         .font(.subheadline)
                         .foregroundStyle(theme.secondary)
+                        .fixedSize()
                     Spacer(minLength: Rhythm.line)
                     Text(value)
                         .font(.system(.title2, design: .rounded))
                         .foregroundStyle(theme.ink)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.6)
+                        .fixedSize()
                 }
                 VStack(alignment: .leading, spacing: 2) {
                     Text(label)

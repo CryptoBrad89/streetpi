@@ -218,12 +218,11 @@ final class DesignSnapshotTests: XCTestCase {
                         .environment(\.colorScheme, scheme)
                         .environment(\.dynamicTypeSize, size.dynamicType)
                         .environment(\.streetPiStill, true)
-                    assertSnapshot(
+                    recordSnapshot(
                         of: view,
-                        as: .image(
-                            layout: .device(config: device.config),
-                            traits: traits(scheme: scheme, size: size)
-                        ),
+                        layout: device.config,
+                        scheme: scheme,
+                        size: size,
                         named: "\(name(scheme))-\(size.rawValue)-\(device.rawValue)"
                     )
                 }
@@ -262,17 +261,34 @@ final class DesignSnapshotTests: XCTestCase {
                     .environment(\.colorScheme, scheme)
                     .environment(\.dynamicTypeSize, size.dynamicType)
                     .environment(\.streetPiStill, true)
-                    assertSnapshot(
+                    recordSnapshot(
                         of: view,
-                        as: .image(
-                            layout: .device(config: device.config),
-                            traits: traits(scheme: scheme, size: size)
-                        ),
+                        layout: device.config,
+                        scheme: scheme,
+                        size: size,
                         named: "\(name(scheme))-\(size.rawValue)-\(device.rawValue)",
                         testName: testName
                     )
                 }
             }
+        }
+    }
+
+    private func recordSnapshot<V: View>(
+        of view: V,
+        layout: ViewImageConfig,
+        scheme: ColorScheme,
+        size: SnapshotScale,
+        named: String,
+        testName: String = #function
+    ) {
+        withSnapshotTesting(record: .never) {
+            assertSnapshot(
+                of: view,
+                as: .image(layout: .device(config: layout), traits: traits(scheme: scheme, size: size)),
+                named: named,
+                testName: testName
+            )
         }
     }
 
@@ -311,12 +327,14 @@ private enum SnapshotDevice: String, CaseIterable {
     case smallPhone
     case largePhone
     case pad
+    case padLandscape
 
     var config: ViewImageConfig {
         switch self {
         case .smallPhone: .iPhoneSe
         case .largePhone: .iPhone13ProMax
-        case .pad: .iPadPro11
+        case .pad: .iPadPro11(.portrait)
+        case .padLandscape: .iPadPro11(.landscape)
         }
     }
 }

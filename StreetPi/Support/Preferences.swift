@@ -36,17 +36,17 @@ enum HouseScreen: Equatable {
             StatusNarrator.narrate(snapshot, now: now)
         case .empty:
             PlainEnglishStatus(
-                headline: "Nothing to show yet.",
-                detail: "StreetPi has no reading for the house.",
+                headline: HouseReadingCopy.emptyTitle,
+                detail: HouseReadingCopy.emptyDetail,
                 tone: .calm,
-                linkLine: "On the home network"
+                linkLine: "No reading yet"
             )
         case .failed:
             PlainEnglishStatus(
-                headline: "StreetPi couldn't read the house.",
-                detail: "Nothing was changed. The last try failed.",
+                headline: HouseReadingCopy.unreachableTitle,
+                detail: HouseReadingCopy.unreachableDetail,
                 tone: .problem,
-                linkLine: "No reading"
+                linkLine: "Not connected"
             )
         }
     }

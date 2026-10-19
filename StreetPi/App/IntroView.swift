@@ -1,5 +1,39 @@
 import SwiftUI
 
+/// The splash slot. This build shows a still. A later video splash replaces `SplashStill` only.
+struct SplashStill: View {
+    var theme: StreetTheme
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Rhythm.line) {
+            Image(systemName: "house.fill")
+                .font(.largeTitle)
+                .foregroundStyle(theme.accent)
+                .accessibilityHidden(true)
+            Text("StreetPi")
+                .font(.system(.largeTitle, design: .serif))
+                .foregroundStyle(theme.ink)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityAddTraits(.isHeader)
+            Text("The house, in plain English.")
+                .font(.title3)
+                .foregroundStyle(theme.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(Rhythm.block)
+        .frame(maxWidth: 420, alignment: .leading)
+        .background {
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .fill(theme.surface)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 28, style: .continuous)
+                        .stroke(theme.hairline, lineWidth: 1)
+                }
+        }
+        .accessibilityElement(children: .contain)
+    }
+}
+
 struct IntroView: View {
     var theme: StreetTheme
     var animatesIn: Bool
@@ -18,23 +52,16 @@ struct IntroView: View {
     var body: some View {
         ZStack {
             theme.background.ignoresSafeArea()
-            VStack(alignment: .leading, spacing: Rhythm.line) {
-                Text("StreetPi")
-                    .font(.system(.largeTitle, design: .serif))
-                    .foregroundStyle(theme.ink)
-                    .accessibilityAddTraits(.isHeader)
-                Text("The house, in plain English.")
-                    .font(.title3)
-                    .foregroundStyle(theme.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .padding(Rhythm.page)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-            .opacity(visible ? 1 : 0)
+            SplashStill(theme: theme)
+                .padding(Rhythm.page)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .opacity(visible ? 1 : 0)
+                .accessibilitySortPriority(0)
             VStack {
                 HStack {
                     Spacer()
                     SkipControl(title: "Skip", action: onFinished)
+                        .accessibilitySortPriority(1)
                 }
                 Spacer()
             }
@@ -45,12 +72,12 @@ struct IntroView: View {
                 visible = true
                 return
             }
-            withAnimation(.easeOut(duration: 0.45)) {
+            withAnimation(.easeOut(duration: 0.35)) {
                 visible = true
             }
         }
         .task {
-            let hold: Duration = reduceMotion ? .milliseconds(400) : .milliseconds(1_350)
+            let hold: Duration = reduceMotion ? .milliseconds(200) : .milliseconds(800)
             try? await Task.sleep(for: hold)
             guard !Task.isCancelled else { return }
             onFinished()

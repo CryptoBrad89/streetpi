@@ -59,8 +59,7 @@ struct DNSLogScreen: View {
             Text(title)
                 .font(.system(.largeTitle, design: .rounded))
                 .foregroundStyle(theme.ink)
-                .lineLimit(2)
-                .minimumScaleFactor(0.6)
+                .fixedSize(horizontal: false, vertical: true)
                 .accessibilityAddTraits(.isHeader)
             if queries.isEmpty {
                 EmptyNote(title: emptyTitle, detail: emptyDetail, theme: theme)
@@ -88,6 +87,7 @@ struct DNSLogScreen: View {
                 }
                 .font(.body.weight(.semibold))
                 .foregroundStyle(theme.accent)
+                .frame(minHeight: 44, alignment: .leading)
                 .accessibilityLabel("Allow \(query.domain)")
             }
         }

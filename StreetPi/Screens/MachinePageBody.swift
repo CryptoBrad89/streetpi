@@ -7,12 +7,20 @@ struct MachinePageBody: View {
     var machine: MachineReading?
     var theme: StreetTheme
     var wide: Bool
+    var showsDestinations: Bool = true
     var onPage: (MachinePage) -> Void
 
     var body: some View {
         switch page {
         case .dashboard:
-            MachineHome(desk: desk, machine: machine, theme: theme, wide: wide, onPage: onPage)
+            MachineHome(
+                desk: desk,
+                machine: machine,
+                theme: theme,
+                wide: wide,
+                showsDestinations: showsDestinations,
+                onPage: onPage
+            )
         case .chart:
             MetricChartScreen(series: desk.series, theme: theme, wide: wide)
         case .services:
