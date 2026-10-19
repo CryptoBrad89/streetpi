@@ -8,6 +8,14 @@ struct AppShell: View {
     var now: Date
     var onSection: (AppSection) -> Void
     var onAppearance: (AppearancePreference) -> Void
+    var desk: DNSDesk = .houseFixture
+    var dnsPage: DNSPage?
+    var pendingAction: HouseholdAction?
+    var passwordSaved: Bool = true
+    var onDNSPage: (DNSPage?) -> Void = { _ in }
+    var onPending: (HouseholdAction?) -> Void = { _ in }
+    var onConfirm: (HouseholdAction) -> Void = { _ in }
+    var onSavePassword: () -> Void = {}
 
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -31,6 +39,14 @@ struct AppShell: View {
             GeometryReader { proxy in
                 shell(wide: proxy.size.width >= 760)
                     .frame(width: proxy.size.width, height: proxy.size.height, alignment: .topLeading)
+            }
+            if let pendingAction {
+                ActionConfirm(
+                    action: pendingAction,
+                    theme: theme,
+                    onCancel: { onPending(nil) },
+                    onConfirm: { onConfirm(pendingAction) }
+                )
             }
         }
         .tint(theme.accent)
@@ -136,16 +152,26 @@ struct AppShell: View {
         case .home, .settings:
             "StreetPi"
         case .group(let group):
-            group.title
+            if group == .adBlockerAndDNS, let dnsPage {
+                dnsPage.title
+            } else {
+                group.title
+            }
         }
     }
 
     @ViewBuilder
     private var chromeButton: some View {
         switch section {
-        case .group:
-            IconChromeButton(title: "Home", systemImage: "chevron.backward") {
-                onSection(.home)
+        case .group(let group):
+            if group == .adBlockerAndDNS, dnsPage != nil {
+                IconChromeButton(title: "Ad blocker & DNS", systemImage: "chevron.backward") {
+                    onDNSPage(nil)
+                }
+            } else {
+                IconChromeButton(title: "Home", systemImage: "chevron.backward") {
+                    onSection(.home)
+                }
             }
         case .settings:
             IconChromeButton(title: "Home", systemImage: "house") {
@@ -173,7 +199,9 @@ struct AppShell: View {
                 onGroup: { onSection(.group($0)) }
             )
         case .group(let group):
-            if let brief = groups.first(where: { $0.id == group }) {
+            if group == .adBlockerAndDNS {
+                dnsDetail(wide: wide)
+            } else if let brief = groups.first(where: { $0.id == group }) {
                 GroupDashboard(
                     theme: theme,
                     brief: brief,
@@ -199,6 +227,38 @@ struct AppShell: View {
             }
         case .settings:
             SettingsView(theme: theme, appearance: appearance, onAppearance: onAppearance)
+        }
+    }
+
+    @ViewBuilder
+    private func dnsDetail(wide: Bool) -> some View {
+        if let dnsPage {
+            VStack(alignment: .leading, spacing: 0) {
+                if wide {
+                    WideBack(title: "Ad blocker & DNS", theme: theme) {
+                        onDNSPage(nil)
+                    }
+                    .padding(.horizontal, Rhythm.page)
+                    .padding(.top, Rhythm.line)
+                }
+                DNSPageBody(
+                    page: dnsPage,
+                    desk: desk,
+                    theme: theme,
+                    wide: wide,
+                    now: now,
+                    onAction: { onPending($0) }
+                )
+            }
+        } else {
+            DNSHub(
+                desk: desk,
+                theme: theme,
+                wide: wide,
+                passwordSaved: passwordSaved,
+                onPage: { onDNSPage($0) },
+                onSavePassword: onSavePassword
+            )
         }
     }
 

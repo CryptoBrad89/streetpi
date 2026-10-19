@@ -71,7 +71,7 @@ public enum ReadingText {
             case .backup:
                 return "Copied"
             case .internet:
-                return "Updating"
+                return "Up to date"
             case .remoteHelp:
                 return "Ready"
             default:

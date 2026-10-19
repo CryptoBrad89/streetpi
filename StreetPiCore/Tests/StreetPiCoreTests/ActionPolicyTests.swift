@@ -42,7 +42,7 @@ final class ActionPolicyTests: XCTestCase {
     func testWritesExplainThemselvesWithoutFaceID() {
         let stop = ActionPolicy.confirmation(for: .stopService(named: "Media"))
         let dns = ActionPolicy.confirmation(for: .changeDNSSettings)
-        let pause = ActionPolicy.confirmation(for: .pauseAdBlocking)
+        let pause = ActionPolicy.confirmation(for: .pauseAdBlocking(.untilTurnedBackOn))
         let resume = ActionPolicy.confirmation(for: .resumeAdBlocking)
 
         for confirmation in [stop, dns, pause, resume] {
@@ -51,13 +51,25 @@ final class ActionPolicyTests: XCTestCase {
         }
         XCTAssertTrue(stop.explanation?.contains("Media will stop") ?? false)
         XCTAssertTrue(pause.explanation?.contains("whole house") ?? false)
+        let timed = ActionPolicy.confirmation(for: .pauseAdBlocking(.fiveMinutes))
+        XCTAssertFalse(timed.requiresFaceID)
+        XCTAssertTrue(timed.explanation?.contains("5 minutes") ?? false)
+        XCTAssertTrue(ActionPolicy.confirmation(for: .restartDNS).requiresFaceID)
+        XCTAssertTrue(ActionPolicy.confirmation(for: .flushQueryLog).requiresFaceID)
+        XCTAssertTrue(
+            ActionPolicy.confirmation(for: .removeDNSEntry(.client, named: "Living room")).requiresFaceID
+        )
+        XCTAssertFalse(ActionPolicy.confirmation(for: .updateBlockLists).requiresFaceID)
     }
 
     func testCopyDoesNotNameAPersonOrAPrivateAddress() {
         let actions: [HouseholdAction] = [
             .reboot, .shutDown, .stopService(named: "Media"), .deleteFiles(count: 2),
             .changeDNSSettings, .killProcess(named: "example-daemon"),
-            .pauseAdBlocking, .resumeAdBlocking,
+            .pauseAdBlocking(.fiveMinutes), .resumeAdBlocking,
+            .restartDNS, .flushQueryLog, .updateBlockLists,
+            .removeDNSEntry(.domain, named: "ads.example.test"),
+            .addDomain(named: "ads.example.test", blocked: true),
         ]
         for action in actions {
             let text = ActionPolicy.confirmation(for: action).explanation ?? ""

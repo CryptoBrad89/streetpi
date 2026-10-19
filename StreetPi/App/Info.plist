@@ -29,6 +29,8 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSFaceIDUsageDescription</key>
+	<string>StreetPi uses Face ID before a change that is hard to undo.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>StreetPi looks on your home network for the Pi and the services it runs.</string>
 	<key>UIApplicationSceneManifest</key>

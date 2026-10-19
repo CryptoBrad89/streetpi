@@ -128,6 +128,9 @@ public enum HouseGuide {
         members: [ServiceHealth],
         snapshot: HouseholdSnapshot
     ) -> String {
+        if group == .internet {
+            return internetSummary(members)
+        }
         if members.allSatisfy({ $0.state == .notResponding }), let only = members.first, members.count == 1 {
             return downLine(only)
         }
@@ -150,12 +153,19 @@ public enum HouseGuide {
         case .remoteHelp:
             return "Remote help is ready."
         case .internet:
-            return "The house name is updating."
+            return internetSummary(members)
         case .backups:
             return "The weekly copy succeeded."
         case .piHealth:
             return piSummary(snapshot)
         }
+    }
+
+    private static func internetSummary(_ members: [ServiceHealth]) -> String {
+        if members.allSatisfy({ $0.state == .responding }) {
+            return "The home's address on the internet is up to date."
+        }
+        return "The home's address on the internet is out of date."
     }
 
     private static func downLine(_ service: ServiceHealth) -> String {

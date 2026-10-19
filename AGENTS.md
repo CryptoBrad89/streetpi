@@ -34,7 +34,7 @@ For every screen: dark, light, Dynamic Type `.large`, Dynamic Type `.accessibili
 ### Pre-ship checklist
 
 - Dark was designed first. Light still looks intentional.
-- The look is the chosen hybrid: a warm rounded status card, labelled meter rows, and a plain service list. Do not bring back a direction picker.
+- The look is the chosen hybrid: a warm rounded status card, labelled meter rows, and group cards. The ad blocker opens into its own pages in that same look. Do not bring back a direction picker.
 - Copy is original plain English. No text, icons, or screenshots from Open Pi or Pi-hole Remote.
 - Reduce Motion, VoiceOver labels, and Dynamic Type were considered.
 - No analytics, ads, crash reporting, or tracking SDK.
