@@ -38,25 +38,6 @@ struct ToneMark: View {
     }
 }
 
-/// Glass is reserved for chrome and the status card. Reading type stays on a solid ground.
-struct SkipControl: View {
-    var title: String
-    var action: () -> Void
-
-    var body: some View {
-        if #available(iOS 26, *) {
-            Button(title, action: action)
-                .buttonStyle(.glass)
-                .frame(minWidth: 44, minHeight: 44)
-        } else {
-            Button(title, action: action)
-                .padding(.horizontal, 16)
-                .frame(minHeight: 44)
-                .background(.ultraThinMaterial, in: Capsule())
-        }
-    }
-}
-
 struct IconChromeButton: View {
     var title: String
     var systemImage: String

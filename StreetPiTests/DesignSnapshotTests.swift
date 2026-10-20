@@ -210,24 +210,12 @@ final class DesignSnapshotTests: XCTestCase {
         assertMatrix(section: .settings, screen: .ready(house), testName: "settings")
     }
 
-    func testIntro() {
-        for scheme in [ColorScheme.dark, ColorScheme.light] {
-            for size in SnapshotScale.allCases {
-                for device in SnapshotDevice.allCases {
-                    let view = IntroView(theme: .house(scheme), animatesIn: false) {}
-                        .environment(\.colorScheme, scheme)
-                        .environment(\.dynamicTypeSize, size.dynamicType)
-                        .environment(\.streetPiStill, true)
-                    recordSnapshot(
-                        of: view,
-                        layout: device.config,
-                        scheme: scheme,
-                        size: size,
-                        named: "\(name(scheme))-\(size.rawValue)-\(device.rawValue)"
-                    )
-                }
-            }
-        }
+    func testSplashOpening() throws {
+        try assertSplash(SplashFixture.opening(), testName: "splash-opening")
+    }
+
+    func testSplashClosing() throws {
+        try assertSplash(SplashFixture.closing(), testName: "splash-closing")
     }
 
     private func assertMatrix(
@@ -289,6 +277,27 @@ final class DesignSnapshotTests: XCTestCase {
                 named: named,
                 testName: testName
             )
+        }
+    }
+
+    private func assertSplash(_ poster: UIImage, testName: String) {
+        for scheme in [ColorScheme.dark, ColorScheme.light] {
+            for size in SnapshotScale.allCases {
+                for device in SnapshotDevice.allCases {
+                    let view = IntroView(poster: poster) {}
+                        .environment(\.colorScheme, scheme)
+                        .environment(\.dynamicTypeSize, size.dynamicType)
+                        .environment(\.streetPiStill, true)
+                    recordSnapshot(
+                        of: view,
+                        layout: device.config,
+                        scheme: scheme,
+                        size: size,
+                        named: "\(name(scheme))-\(size.rawValue)-\(device.rawValue)",
+                        testName: testName
+                    )
+                }
+            }
         }
     }
 

@@ -26,4 +26,4 @@ Secrets go in the iOS Keychain (`KeychainSecretStore`). Tests use `MemorySecretS
 
 GitHub Actions runs the core tests on Ubuntu and, on a standard `macos-26` runner, the snapshot matrix plus an unsigned `StreetPi-unsigned.ipa`. Do not move that job to a large or extra-large runner.
 
-Snapshots cover Home, the ad blocker pages, the machine pages, alerts, Settings, and the intro, in dark and light, default and largest Dynamic Type, on a small iPhone, a large iPhone, and an iPad.
+Snapshots cover Home, the ad blocker pages, the machine pages, alerts, Settings, and the opening film, in dark and light, default and largest Dynamic Type, on a small iPhone, a large iPhone, and an iPad.

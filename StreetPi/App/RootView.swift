@@ -5,7 +5,7 @@ struct RootView: View {
     @State private var clock: Date
     @State private var screen = HouseScreen.ready(.healthyFixture)
     @State private var section = AppSection.home
-    @State private var showIntro = true
+    @State private var showIntro: Bool
     @State private var desk = DNSDesk.houseFixture
     @State private var dnsPage: DNSPage?
     @State private var machine = MachineDesk.houseFixture
@@ -14,13 +14,15 @@ struct RootView: View {
     @State private var passwordSaved = false
     @State private var showsSetup = false
     @State private var dnsSession = DNSSessionHold()
-    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.secretStore) private var secretStore
     @AppStorage(PreferenceKey.appearance) private var appearanceRaw = AppearancePreference.system.rawValue
 
     init(now: Date) {
         _clock = State(initialValue: now)
+        let testing = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+        _showIntro = State(initialValue: !testing)
     }
 
     private var appearance: AppearancePreference {
@@ -62,11 +64,11 @@ struct RootView: View {
                 onSetupSave: saveSetup,
                 onSetupCancel: { showsSetup = false }
             )
+            .accessibilityHidden(showIntro)
             if showIntro {
-                IntroView(theme: .house(colorScheme), animatesIn: true) {
-                    showIntro = false
-                }
-                .transition(.opacity)
+                IntroView(onFinished: dismissIntro)
+                    .transition(.opacity)
+                    .zIndex(1)
             }
         }
         .preferredColorScheme(appearance.colorScheme)
@@ -83,6 +85,13 @@ struct RootView: View {
             let stored = try? secretStore.load(for: AppPassword.account)
             passwordSaved = stored != nil
             await watchHouse()
+        }
+    }
+
+    private func dismissIntro() {
+        let animation: Animation = reduceMotion ? .easeOut(duration: 0.2) : .easeInOut(duration: 0.45)
+        withAnimation(animation) {
+            showIntro = false
         }
     }
 
