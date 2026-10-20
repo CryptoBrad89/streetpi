@@ -207,13 +207,7 @@ final class DesignSnapshotTests: XCTestCase {
     }
 
     func testSettings() {
-        continueAfterFailure = true
-        assertMatrix(
-            section: .settings,
-            screen: .ready(house),
-            testName: "settings",
-            record: .failed
-        )
+        assertMatrix(section: .settings, screen: .ready(house), testName: "settings")
     }
 
     func testSplashOpening() throws {
@@ -233,8 +227,7 @@ final class DesignSnapshotTests: XCTestCase {
         machinePage: MachinePage? = nil,
         pending: HouseholdAction? = nil,
         showsSetup: Bool = false,
-        dnsProblem: PiholeProblem? = nil,
-        record: SnapshotTestingConfiguration.Record = .never
+        dnsProblem: PiholeProblem? = nil
     ) {
         for scheme in [ColorScheme.dark, ColorScheme.light] {
             for size in SnapshotScale.allCases {
@@ -262,8 +255,7 @@ final class DesignSnapshotTests: XCTestCase {
                         scheme: scheme,
                         size: size,
                         named: "\(name(scheme))-\(size.rawValue)-\(device.rawValue)",
-                        testName: testName,
-                        record: record
+                        testName: testName
                     )
                 }
             }
@@ -276,10 +268,9 @@ final class DesignSnapshotTests: XCTestCase {
         scheme: ColorScheme,
         size: SnapshotScale,
         named: String,
-        testName: String = #function,
-        record: SnapshotTestingConfiguration.Record = .never
+        testName: String = #function
     ) {
-        withSnapshotTesting(record: record) {
+        withSnapshotTesting(record: .never) {
             assertSnapshot(
                 of: view,
                 as: .image(layout: .device(config: layout), traits: traits(scheme: scheme, size: size)),
