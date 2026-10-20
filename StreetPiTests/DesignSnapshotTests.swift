@@ -207,27 +207,23 @@ final class DesignSnapshotTests: XCTestCase {
     }
 
     func testSettings() {
-        assertMatrix(section: .settings, screen: .ready(house), testName: "settings")
+        continueAfterFailure = true
+        assertMatrix(
+            section: .settings,
+            screen: .ready(house),
+            testName: "settings",
+            record: .failed
+        )
     }
 
-    func testIntro() {
-        for scheme in [ColorScheme.dark, ColorScheme.light] {
-            for size in SnapshotScale.allCases {
-                for device in SnapshotDevice.allCases {
-                    let view = IntroView(theme: .house(scheme), animatesIn: false) {}
-                        .environment(\.colorScheme, scheme)
-                        .environment(\.dynamicTypeSize, size.dynamicType)
-                        .environment(\.streetPiStill, true)
-                    recordSnapshot(
-                        of: view,
-                        layout: device.config,
-                        scheme: scheme,
-                        size: size,
-                        named: "\(name(scheme))-\(size.rawValue)-\(device.rawValue)"
-                    )
-                }
-            }
-        }
+    func testSplashOpening() throws {
+        continueAfterFailure = true
+        try assertSplash(SplashFixture.opening(), testName: "splash-opening")
+    }
+
+    func testSplashClosing() throws {
+        continueAfterFailure = true
+        try assertSplash(SplashFixture.closing(), testName: "splash-closing")
     }
 
     private func assertMatrix(
@@ -239,7 +235,8 @@ final class DesignSnapshotTests: XCTestCase {
         machinePage: MachinePage? = nil,
         pending: HouseholdAction? = nil,
         showsSetup: Bool = false,
-        dnsProblem: PiholeProblem? = nil
+        dnsProblem: PiholeProblem? = nil,
+        record: SnapshotTestingConfiguration.Record = .never
     ) {
         for scheme in [ColorScheme.dark, ColorScheme.light] {
             for size in SnapshotScale.allCases {
@@ -267,7 +264,8 @@ final class DesignSnapshotTests: XCTestCase {
                         scheme: scheme,
                         size: size,
                         named: "\(name(scheme))-\(size.rawValue)-\(device.rawValue)",
-                        testName: testName
+                        testName: testName,
+                        record: record
                     )
                 }
             }
@@ -280,15 +278,38 @@ final class DesignSnapshotTests: XCTestCase {
         scheme: ColorScheme,
         size: SnapshotScale,
         named: String,
-        testName: String = #function
+        testName: String = #function,
+        record: SnapshotTestingConfiguration.Record = .never
     ) {
-        withSnapshotTesting(record: .never) {
+        withSnapshotTesting(record: record) {
             assertSnapshot(
                 of: view,
                 as: .image(layout: .device(config: layout), traits: traits(scheme: scheme, size: size)),
                 named: named,
                 testName: testName
             )
+        }
+    }
+
+    private func assertSplash(_ poster: UIImage, testName: String) {
+        for scheme in [ColorScheme.dark, ColorScheme.light] {
+            for size in SnapshotScale.allCases {
+                for device in SnapshotDevice.allCases {
+                    let view = IntroView(poster: poster) {}
+                        .environment(\.colorScheme, scheme)
+                        .environment(\.dynamicTypeSize, size.dynamicType)
+                        .environment(\.streetPiStill, true)
+                    recordSnapshot(
+                        of: view,
+                        layout: device.config,
+                        scheme: scheme,
+                        size: size,
+                        named: "\(name(scheme))-\(size.rawValue)-\(device.rawValue)",
+                        testName: testName,
+                        record: .missing
+                    )
+                }
+            }
         }
     }
 

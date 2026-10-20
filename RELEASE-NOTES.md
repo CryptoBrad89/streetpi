@@ -1,6 +1,8 @@
-# StreetPi 1.0.0 (1)
+# StreetPi 1.0.0 (2)
 
 The first sideload. One app for the house, in plain English.
+
+- Opening plays a short film with sound. The silent switch mutes it, and other music keeps playing. Tap anywhere to skip. Reduce Motion shows the final frame, then Home.
 
 - Dark is the main look. Light is cream. Appearance can follow the system, or stay Dark or Light.
 - Home is the porch card and the meters. Each part of the house opens from its own card.
