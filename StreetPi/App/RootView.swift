@@ -5,7 +5,7 @@ struct RootView: View {
     @State private var clock: Date
     @State private var screen = HouseScreen.ready(.healthyFixture)
     @State private var section = AppSection.home
-    @State private var showIntro = true
+    @State private var showIntro: Bool
     @State private var desk = DNSDesk.houseFixture
     @State private var dnsPage: DNSPage?
     @State private var machine = MachineDesk.houseFixture
@@ -21,6 +21,8 @@ struct RootView: View {
 
     init(now: Date) {
         _clock = State(initialValue: now)
+        let testing = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+        _showIntro = State(initialValue: !testing)
     }
 
     private var appearance: AppearancePreference {
