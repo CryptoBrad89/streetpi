@@ -326,7 +326,6 @@ final class DesignSnapshotTests: XCTestCase {
     }
 
     /// Full gallery height at the device width. A scroll view would clip the lower components.
-    /// Missing references record on the macOS run; comparisons use the saved PNGs after that.
     private func recordFitting<V: View>(
         of view: V,
         scheme: ColorScheme,
@@ -334,7 +333,7 @@ final class DesignSnapshotTests: XCTestCase {
         named: String,
         testName: String
     ) {
-        withSnapshotTesting(record: .missing) {
+        withSnapshotTesting(record: .never) {
             assertSnapshot(
                 of: view,
                 as: .image(layout: .sizeThatFits, traits: traits(scheme: scheme, size: size)),
