@@ -60,18 +60,28 @@ struct GalleryTabButton: View {
     }
 
     private var label: some View {
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                tabLabel
+                    .labelStyle(.titleAndIcon)
+            } else {
+                tabLabel
+                    .labelStyle(.vertical)
+            }
+        }
+        .font(AfterglowType.label)
+        .foregroundStyle(selected ? palette.accent : palette.secondary)
+    }
+
+    private var tabLabel: some View {
         Label {
             Text(tab.title)
                 .lineLimit(2)
-                .multilineTextAlignment(dynamicTypeSize.isAccessibilitySize ? .leading : .center)
                 .fixedSize(horizontal: false, vertical: true)
         } icon: {
             Image(systemName: tab.symbol)
                 .accessibilityHidden(true)
         }
-        .font(AfterglowType.label)
-        .foregroundStyle(selected ? palette.accent : palette.secondary)
-        .labelStyle(dynamicTypeSize.isAccessibilitySize ? .titleAndIcon : .vertical)
     }
 }
 
