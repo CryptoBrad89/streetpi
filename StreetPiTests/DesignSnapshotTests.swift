@@ -210,6 +210,30 @@ final class DesignSnapshotTests: XCTestCase {
         assertMatrix(section: .settings, screen: .ready(house), testName: "settings")
     }
 
+    func testComponentGallery() {
+        for scheme in [ColorScheme.dark, ColorScheme.light] {
+            for size in SnapshotScale.allCases {
+                for device in SnapshotDevice.allCases {
+                    let width = device.config.size?.width ?? 320
+                    let board = AfterglowScope {
+                        ComponentBoard()
+                    }
+                    .frame(width: width)
+                    .environment(\.colorScheme, scheme)
+                    .environment(\.dynamicTypeSize, size.dynamicType)
+                    .environment(\.streetPiStill, true)
+                    recordFitting(
+                        of: board,
+                        scheme: scheme,
+                        size: size,
+                        named: "\(name(scheme))-\(size.rawValue)-\(device.rawValue)",
+                        testName: "component-gallery"
+                    )
+                }
+            }
+        }
+    }
+
     func testSplashOpening() throws {
         try assertSplash(SplashFixture.opening(), testName: "splash-opening")
     }
@@ -298,6 +322,25 @@ final class DesignSnapshotTests: XCTestCase {
                     )
                 }
             }
+        }
+    }
+
+    /// Full gallery height at the device width. A scroll view would clip the lower components.
+    /// Missing references record on the macOS run; comparisons use the saved PNGs after that.
+    private func recordFitting<V: View>(
+        of view: V,
+        scheme: ColorScheme,
+        size: SnapshotScale,
+        named: String,
+        testName: String
+    ) {
+        withSnapshotTesting(record: .missing) {
+            assertSnapshot(
+                of: view,
+                as: .image(layout: .sizeThatFits, traits: traits(scheme: scheme, size: size)),
+                named: named,
+                testName: testName
+            )
         }
     }
 
