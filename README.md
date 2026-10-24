@@ -6,11 +6,15 @@ The screen is drawn from fake fixtures. It does not talk to the Pi, the router, 
 
 Ad blocker & DNS opens the filter. Today shows blocking and a 24-hour chart of lookups. The only writes are a timed pause, blocking one domain, and allowing one domain. Each one asks in plain English first. Clients, groups, lists, local names, and upkeep are read-only. The text log file can be off; lookups are still kept. The app password and the Pi certificate pin stay in the Keychain. Nothing in this build opens a socket.
 
-Pi health is look-only. It shows meters for the processor, temperature, memory, disk, and uptime, plus a day chart. Services and containers are readings. Alerts stay in the app. Nothing here opens a connection, and the phone does not keep an SSH key or a host pin.
+Pi health is look-only. It shows the processor, temperature, memory, disk, and uptime, plus a day chart. Services and containers are readings. Alerts stay in the app and never name a person. Nothing here opens a connection, and the phone does not keep an SSH key or a host pin.
 
 ## Look
 
-One direction. A warm rounded card says how the house is doing. Under it, labelled meters (Processor, Temperature, Memory, Disk), then a card for each part of the house. Dark is the primary design. Light mode is cream. Settings has Appearance: System, Dark, Light.
+Afterglow. Dark is designed first. Light mode is Daylight, and it is a real design. Home is a Briefing and ring gauges for Processor, Temperature, Memory, and Disk. The Porch card and the Lampblack bar meters are retired. The only gradient is one status-tinted glow behind the Home headline. The video splash stays, and the handoff reuses that same glow.
+
+Tabs are House, Ad blocker, Pi, and Settings. The iPad uses a sidebar. Settings has Appearance: System, Dark, Light.
+
+Closed decisions are in `docs/project-context.md`. The rules are in `AGENTS.md`. Version 1.0.0 still draws the earlier porch screens. This section is the rule from 2026-10-24.
 
 ## Layout
 

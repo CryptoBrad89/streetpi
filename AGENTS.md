@@ -5,10 +5,10 @@
 Every thread that changes the app inherits this rule. Do not skip a tool, swap one out, or quietly replace it. If you believe a tool below is a bad idea for this app, stop and report why before writing code.
 
 1. **Paul Hudson, SwiftUI Pro.** https://github.com/twostraws/SwiftUI-Agent-Skill — read `swiftui-pro/SKILL.md` and the reference that matches the change (accessibility, views, navigation, data, design) before writing or reviewing SwiftUI.
-2. **Thomas Ricouard, Liquid Glass and UI patterns.** https://github.com/Dimillian/Skills — `swiftui-liquid-glass` and `swiftui-ui-patterns`. Liquid Glass on iOS 26 and later. On older iOS, use a tasteful material fallback. Glass is for chrome and the status card, not for body text.
+2. **Thomas Ricouard, Liquid Glass and UI patterns.** https://github.com/Dimillian/Skills — `swiftui-liquid-glass` and `swiftui-ui-patterns`. Liquid Glass on iOS 26 and later. On older iOS, use a tasteful material fallback. Glass is for chrome and the Briefing card, not for body text.
 3. **Point-Free swift-snapshot-testing.** https://github.com/pointfreeco/swift-snapshot-testing — visual review loop. Every screen in dark and light, default and largest Dynamic Type, small iPhone, large iPhone, and iPad. Review the images and fix what looks off before calling the work done.
-4. **SF Symbols 7 and native SwiftUI animation and symbol effects.** Pow (https://github.com/EmergeTools/Pow) is optional. Use it only for a delight moment native effects cannot do. Phase 1 uses native symbol effects and does not vendor Pow.
-5. **Design taste.** Pick a deliberate direction. Ban generic defaults: no stock “AI app” gradients, no default List inside a NavigationStack where a designed screen belongs. Run the pre-ship checklist below.
+4. **SF Symbols 7 and native SwiftUI animation and symbol effects.** Pow (https://github.com/EmergeTools/Pow) stays optional and is unused. Do not vendor it.
+5. **Design taste.** The direction is Afterglow. Ban generic defaults: no stock “AI app” gradients, and no purple. The only allowed gradient is one status-tinted glow behind the Home headline. The splash handoff reuses that same glow. No default List inside a NavigationStack where a designed screen belongs. Run the pre-ship checklist below.
 
 ### SwiftUI Pro rules that always apply
 
@@ -33,9 +33,11 @@ For every screen: dark, light, Dynamic Type `.large`, Dynamic Type `.accessibili
 
 ### Pre-ship checklist
 
-- Dark was designed first. Light still looks intentional.
-- The look is the chosen hybrid: a warm rounded status card, labelled meter rows, and group cards. The ad blocker opens into its own pages in that same look. Do not bring back a direction picker.
-- Copy is original plain English. No text, icons, or screenshots from Open Pi or Pi-hole Remote.
+- Dark was designed first. Light mode is Daylight, and it still looks intentional.
+- The look is Afterglow. Home is a Briefing and ring gauges. The Porch card and the Lampblack bar meters are retired. The ad blocker opens into its own pages in that same look. Do not bring back a direction picker.
+- Tabs are House, Ad blocker, Pi, and Settings. The iPad uses a sidebar.
+- The video splash stays.
+- Copy is original plain English. Alerts never name a person. No text, icons, or screenshots from Open Pi or Pi-hole Remote.
 - Reduce Motion, VoiceOver labels, and Dynamic Type were considered.
 - No analytics, ads, crash reporting, or tracking SDK.
 - No secret in the repo, in logs, or in a fixture that pretends to be real.
@@ -43,10 +45,10 @@ For every screen: dark, light, Dynamic Type `.large`, Dynamic Type `.accessibili
 ## Product constraints
 
 - One app for everyone in the house. No per-person screens, modes, or areas. Face ID protects a destructive action, not a person.
-- iOS 18 minimum. Swift 6. iPhone and iPad. Sidebar on iPad.
+- iOS 18 minimum. Swift 6. iPhone and iPad. Tabs are House, Ad blocker, Pi, and Settings. Sidebar on iPad.
 - `StreetPiCore` is pure Swift and must pass `swift test` on Linux. The app is a thin SwiftUI layer.
 - Fixtures and mocks only until a later phase. No network call to a real host. No Tailscale. No changes to the Pi, router, DNS, or port forwards.
 - Secrets live in the iOS Keychain. ATS allows local networking only. Never set `NSAllowsArbitraryLoads`.
 - Free sideload. CI produces an unsigned `.ipa` on a standard macOS runner. No paid runner size. No Apple Developer Program. No paid SDK.
 - No widgets, Live Activities, Watch app, or TV app in v1.
-- No Chinese-owned SDK or vendor. No unlicensed or GPL-3.0 code copied into the app.
+- No new dependency without asking. No Chinese-owned SDK or vendor. No unlicensed or GPL-3.0 code copied into the app.
